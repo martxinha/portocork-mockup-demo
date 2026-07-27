@@ -3014,13 +3014,13 @@
     { grupo: 'Outros - x25', centroFornecedor: '1404', materialProducao: '60057188', textoBreve: 'RT XPUR 44X25 CF CL0 E', nPedido: '4600036362', itemPedido: '20', tipoOrdem: 'ZEMB', statusOf: 'LIB', dataBaseInicio: '2026-08-07', dataBaseFim: '2026-08-07', qtdProdOf: 28, qtdPedido: 216, qtdExpedida: 0, alertas: 0, estado: 'Pendente' },
     { grupo: 'Outros - x25', centroFornecedor: '1404', materialProducao: '60057188', textoBreve: 'RT XPUR 44X25 CF CL0 E', nPedido: '4600036371', itemPedido: '100', tipoOrdem: 'ZEMB', statusOf: 'ABER', dataBaseInicio: '2026-09-11', dataBaseFim: '2026-09-11', qtdProdOf: 0, qtdPedido: 216, qtdExpedida: 0, alertas: 0, estado: 'Pendente' },
     { grupo: 'Outros - x25', centroFornecedor: '1404', materialProducao: '60057188', textoBreve: 'RT XPUR 44X25 CF CL0 E', nPedido: '4600036371', itemPedido: '110', tipoOrdem: 'ZEMB', statusOf: 'ABER', dataBaseInicio: '2026-09-04', dataBaseFim: '2026-09-04', qtdProdOf: 0, qtdPedido: 72, qtdExpedida: 0, alertas: 0, estado: 'Pendente' },
-    { grupo: 'Outros - x25', centroFornecedor: '1404', materialProducao: '60057188', textoBreve: 'RT XPUR 44X25 CF CL0 E', nPedido: '4600036371', itemPedido: '120', tipoOrdem: 'ZEMB', statusOf: 'ABER', dataBaseInicio: '2026-10-09', dataBaseFim: '2026-10-09', qtdProdOf: 0, qtdPedido: 216, qtdExpedida: 0, alertas: 0, estado: 'Pendente' },
+    { grupo: 'Outros - x25', centroFornecedor: '1404', materialProducao: '60057188', textoBreve: 'RT XPUR 44X25 CF CL0 E', nPedido: '4600036371', itemPedido: '120', tipoOrdem: 'ZEMB', statusOf: 'ABER', dataBaseInicio: '2026-10-09', dataBaseFim: '2026-10-09', qtdProdOf: 0, qtdPedido: 216, qtdExpedida: 0, alertas: 0, estado: 'Alteração' },
     { grupo: 'Outros - x25', centroFornecedor: '1404', materialProducao: '60057188', textoBreve: 'RT XPUR 44X25 CF CL0 E', nPedido: '4600036371', itemPedido: '130', tipoOrdem: 'ZEMB', statusOf: 'ABER', dataBaseInicio: '2026-10-09', dataBaseFim: '2026-10-09', qtdProdOf: 0, qtdPedido: 72, qtdExpedida: 0, alertas: 0, estado: 'Pendente' },
-    { grupo: 'Outros - x25', centroFornecedor: '1404', materialProducao: '60057188', textoBreve: 'RT XPUR 44X25 CF CL0 E', nPedido: '4600036371', itemPedido: '140', tipoOrdem: 'ZEMB', statusOf: 'ABER', dataBaseInicio: '2026-11-06', dataBaseFim: '2026-11-06', qtdProdOf: 0, qtdPedido: 144, qtdExpedida: 0, alertas: 0, estado: 'Pendente' }
+    { grupo: 'Outros - x25', centroFornecedor: '1404', materialProducao: '60057188', textoBreve: 'RT XPUR 44X25 CF CL0 E', nPedido: '4600036371', itemPedido: '140', tipoOrdem: 'ZEMB', statusOf: 'ABER', dataBaseInicio: '2026-11-06', dataBaseFim: '2026-11-06', qtdProdOf: 0, qtdPedido: 144, qtdExpedida: 0, alertas: 0, estado: 'Alteração' }
   ];
 
   function stosPageTemplate() {
-    var alertas = STOS_ROWS.filter(function (r) { return r.estado === 'Pendente'; }).length;
+    var alertas = STOS_ROWS.filter(function (r) { return r.estado === 'Pendente' || r.estado === 'Alteração'; }).length;
     return '<div class="breadcrumb"><span class="crumb-current">STOs (' + alertas + ' Alertas)</span></div><div class="content-card" id="stosCard"></div>';
   }
 
@@ -3029,19 +3029,20 @@
   function renderStosBody() {
     var card = document.getElementById('stosCard');
     var rows = STOS_ROWS.filter(function (r) { return stosState.estado === 'Todos' || r.estado === stosState.estado; });
-    var chips = ['Todos', 'Pendente', 'Expedido'].map(function (e) {
+    var chips = ['Todos', 'Pendente', 'Alteração', 'Expedido'].map(function (e) {
       return '<div class="chip-filter' + (e === stosState.estado ? ' active' : '') + '" data-estado="' + e + '">' + e + '</div>';
     }).join('');
     var toolbar = '<div class="prod-toolbar"><div class="chip-group">' + chips + '</div><div class="toolbar-spacer"></div><button class="btn btn-primary" id="stosExportar">' + svg('download', 'width="14" height="14"') + ' EXPORTAR</button></div>';
     var rowsHtml = rows.map(function (r) {
-      return '<tr><td class="prod-cell">' + svg('orders', 'width="14" height="14" style="color:var(--brand-primary)"') + '</td><td>' + r.grupo + '</td><td class="prod-cell">' + r.centroFornecedor + '</td><td>' + r.materialProducao + '</td><td>' + r.textoBreve + '</td>' +
+      var isAlteracao = r.estado === 'Alteração';
+      return '<tr' + (isAlteracao ? ' style="background:var(--evt-stop-bg);"' : '') + '><td class="prod-cell">' + svg('orders', 'width="14" height="14" style="color:var(--brand-primary)"') + '</td><td>' + r.grupo + '</td><td class="prod-cell">' + r.centroFornecedor + '</td><td>' + r.materialProducao + '</td><td>' + r.textoBreve + '</td>' +
         '<td>' + r.nPedido + '</td><td class="prod-cell">' + r.itemPedido + '</td><td class="prod-cell">' + r.tipoOrdem + '</td><td class="prod-cell">' + r.statusOf + '</td>' +
         '<td>' + r.dataBaseInicio + '</td><td>' + r.dataBaseFim + '</td>' +
         '<td class="prod-cell">' + r.qtdProdOf + '</td><td class="prod-cell">' + r.qtdPedido + '</td><td class="prod-cell">' + r.qtdExpedida + '</td><td class="prod-cell">' + r.alertas + '</td>' +
-        '<td class="prod-cell"><span class="stat-pill ' + (r.estado === 'Expedido' ? 'pill-good' : 'pill-warn') + '">' + r.estado + '</span></td>' +
+        '<td class="prod-cell"><span class="stat-pill ' + (r.estado === 'Expedido' ? 'pill-good' : isAlteracao ? 'pill-bad' : 'pill-warn') + '">' + r.estado + '</span></td>' +
         '<td class="prod-cell"><button class="icon-inline-btn" data-sto-alt-idx="' + STOS_ROWS.indexOf(r) + '" title="Pedido de alteração de data">' + svg('calmonth', 'width="14" height="14"') + '</button></td></tr>';
     }).join('');
-    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr>' +
+    var table = '<div class="prod-table-wrap"><table class="prod-table table-compact"><thead><tr>' +
       '<th></th><th>Grupo</th><th>Centro Fornecedor</th><th>Material de Produção</th><th>Texto Breve de Material</th>' +
       '<th>Nº Pedido</th><th>Item do Pedido</th><th>Tipo de Ordem de Produção / Planeada</th><th>Status OF</th>' +
       '<th>Data-base do Início</th><th>Data-base do Fim</th>' +
