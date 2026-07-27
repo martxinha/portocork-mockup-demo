@@ -1243,6 +1243,7 @@
     ofsListaStandard: 'Lista Standard',
     ofsConfiguracoes: 'Configurações',
     stos: 'STOs',
+    perfilFornecedores: 'Perfil de Fornecedores',
     producaoAcompanhamento: 'Acompanhamento',
     maquinas: 'Máquinas',
     configOperacao: 'Operação',
@@ -1276,7 +1277,14 @@
         { key: 'ofsConfiguracoes', title: 'Configurações' }
       ]
     },
-    { key: 'stos', icon: 'truck', title: 'STOs' },
+    {
+      icon: 'truck',
+      title: 'STOs',
+      submenu: [
+        { key: 'stos', title: 'STOs' },
+        { key: 'perfilFornecedores', title: 'Perfil de Fornecedores' }
+      ]
+    },
     { key: 'maquinas', icon: 'factory', title: 'Máquinas' },
     {
       icon: 'gear',
@@ -3068,6 +3076,46 @@
     document.getElementById('stoAltData').value = row.dataBaseInicio;
     document.getElementById('stoAltMotivo').value = '';
     document.getElementById('stoAltDataOverlay').classList.add('open');
+  }
+
+  /* ==================================================================
+     STOs > Perfil de Fornecedores
+     ================================================================== */
+  var PERFIL_FORNECEDORES_ROWS = [
+    { fornecedor: 'Amorim Lamas', contacto: 'sto@amorimlamas.pt', leadTimeAssumido: 1, tipoStock: 'Pronto' },
+    { fornecedor: 'VL', contacto: 'sto@vl.pt', leadTimeAssumido: 1, tipoStock: 'Aproximado' },
+    { fornecedor: 'Cortiças Robinson, Lda.', contacto: 'sto@robinson.pt', leadTimeAssumido: 2, tipoStock: 'Pronto' },
+    { fornecedor: 'J. Guimarães & Filhos', contacto: 'sto@jguimaraes.pt', leadTimeAssumido: 3, tipoStock: 'Aproximado' }
+  ];
+  var PERFIL_FORNECEDORES_FIELDS = [
+    { key: 'fornecedor', label: 'Fornecedor', type: 'text' },
+    { key: 'contacto', label: 'Contacto', type: 'text' },
+    { key: 'leadTimeAssumido', label: 'Lead Time Assumido (dias)', type: 'number' },
+    { key: 'tipoStock', label: 'Tipo de Stock', type: 'select', options: ['Pronto', 'Aproximado'] }
+  ];
+
+  function perfilFornecedoresPageTemplate() {
+    return '<div class="breadcrumb"><span class="crumb-muted">STOs</span><span class="crumb-sep">/</span><span class="crumb-current">Perfil de Fornecedores</span></div><div class="content-card" id="perfilFornecedoresCard"></div>';
+  }
+
+  function bindPerfilFornecedoresControls() { renderPerfilFornecedoresBody(); }
+
+  function renderPerfilFornecedoresBody() {
+    var card = document.getElementById('perfilFornecedoresCard');
+    var toolbar = '<div class="prod-toolbar"><button class="icon-inline-btn" title="Indica se o stock deste fornecedor é confirmado (Pronto) ou uma estimativa (Aproximado), para dar mais confiança ao planeamento">ⓘ</button><div class="stat-inline">Perfil de fiabilidade de stock por fornecedor (STO)</div></div>';
+    var rowsHtml = PERFIL_FORNECEDORES_ROWS.map(function (r, idx) {
+      return '<tr><td>' + r.fornecedor + '</td><td>' + r.contacto + '</td><td class="prod-cell">' + r.leadTimeAssumido + '</td>' +
+        '<td class="prod-cell"><span class="stat-pill ' + (r.tipoStock === 'Pronto' ? 'pill-good' : 'pill-warn') + '">' + r.tipoStock + '</span></td>' +
+        '<td class="prod-cell"><button class="icon-inline-btn" data-perfilfornecedor-edit-idx="' + idx + '" title="Editar">' + svg('pencil', 'width="14" height="14"') + '</button></td></tr>';
+    }).join('');
+    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Fornecedor</th><th>Contacto</th><th>Lead Time Assumido (dias)</th><th>Tipo de Stock</th><th>Ações</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>';
+    card.innerHTML = toolbar + table;
+    card.querySelectorAll('[data-perfilfornecedor-edit-idx]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var idx = parseInt(btn.getAttribute('data-perfilfornecedor-edit-idx'), 10);
+        openMaquinaEditModal(PERFIL_FORNECEDORES_ROWS, idx, PERFIL_FORNECEDORES_FIELDS, renderPerfilFornecedoresBody);
+      });
+    });
   }
 
   /* ==================================================================
@@ -5336,6 +5384,9 @@
     } else if (state.section === 'stos') {
       main.innerHTML = '<div class="section-page">' + stosPageTemplate() + '</div>';
       bindStosControls();
+    } else if (state.section === 'perfilFornecedores') {
+      main.innerHTML = '<div class="section-page">' + perfilFornecedoresPageTemplate() + '</div>';
+      bindPerfilFornecedoresControls();
     } else if (state.section === 'cargaCapacidade') {
       main.innerHTML = '<div class="section-page">' + cargaCapacidadePageTemplate() + '</div>';
       bindCargaCapacidadeControls();
