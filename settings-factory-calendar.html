@@ -1632,9 +1632,14 @@
     lavacao: 'Todas',
     materiais: 'Todos',
     setores: 'Todos',
+    processoEtapa: 'Todos',
+    processoCentro: 'Todos',
     incluirSemPlano: false,
     tendencia: false
   };
+
+  function planoProcessoEtapa(row) { var parts = row.processo.split(' · '); return parts.length > 1 ? parts[1] : row.processo; }
+  function planoProcessoCentro(row) { var parts = row.processo.split(' · '); return parts.length > 1 ? parts[0] : row.processo; }
 
   function labeledSelect(label, id, options, current) {
     return '<div class="filter-labeled"><span class="filter-label">' + label + '</span>' + selectHtml(id, options, current) + '</div>';
@@ -1798,16 +1803,16 @@
 
   function renderPlanoTab() {
     var days = prodWeekDays();
+    var etapasUnicas = ['Todos'].concat(PLANO_ROWS.map(planoProcessoEtapa).filter(function (v, i, a) { return a.indexOf(v) === i; }));
+    var centrosUnicos = ['Todos'].concat(PLANO_ROWS.map(planoProcessoCentro).filter(function (v, i, a) { return a.indexOf(v) === i; }));
     var rows = PLANO_ROWS.filter(function (r) {
-      return (prodState.calibre === 'Todos' || r.calibre === prodState.calibre) &&
-        (prodState.classe === 'Todas' || r.classe === prodState.classe) &&
-        (prodState.lavacao === 'Todas' || r.lavacao === prodState.lavacao);
+      return (prodState.processoEtapa === 'Todos' || planoProcessoEtapa(r) === prodState.processoEtapa) &&
+        (prodState.processoCentro === 'Todos' || planoProcessoCentro(r) === prodState.processoCentro);
     });
 
     var toolbar = '<div class="prod-toolbar">' + weekNavHtml() +
-      labeledSelect('Calibre', 'prodCalibre', ['Todos', '24x38', '24x45', '24x49'], prodState.calibre) +
-      labeledSelect('Classe', 'prodClasse', ['Todas', 'Extra', 'Primeira', 'Segunda'], prodState.classe) +
-      labeledSelect('Lavação', 'prodLavacao', ['Todas', 'Natural', 'Clássica', 'Rosé'], prodState.lavacao) +
+      labeledSelect('Processo', 'prodProcessoEtapa', etapasUnicas, prodState.processoEtapa) +
+      labeledSelect('Centro de Trabalho', 'prodProcessoCentro', centrosUnicos, prodState.processoCentro) +
       '<div class="switch-row"><div class="switch' + (prodState.incluirSemPlano ? ' on' : '') + '" id="prodIncluirSemPlano"><div class="thumb"></div></div>Incluir sem plano</div>' +
       '<div class="toolbar-spacer"></div>' +
       '<div class="progress-indicator">Progresso da Semana<strong>' + progressAvg(rows) + '%</strong></div>' +
@@ -2018,7 +2023,7 @@
     if (prevBtn) prevBtn.addEventListener('click', function () { prodState.weekMonday.setDate(prodState.weekMonday.getDate() - 7); renderProducaoBody(); });
     if (nextBtn) nextBtn.addEventListener('click', function () { prodState.weekMonday.setDate(prodState.weekMonday.getDate() + 7); renderProducaoBody(); });
 
-    ['prodCalibre', 'prodClasse', 'prodLavacao', 'prodMateriais', 'prodSetores'].forEach(function (id) {
+    ['prodCalibre', 'prodClasse', 'prodLavacao', 'prodMateriais', 'prodSetores', 'prodProcessoEtapa', 'prodProcessoCentro'].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       var stateKey = id.replace('prod', '');
