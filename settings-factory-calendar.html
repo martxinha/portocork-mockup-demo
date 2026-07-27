@@ -2504,7 +2504,7 @@
   CARTEIRA_COLUMNS.forEach(function (c) { carteiraColVisible[c.key] = true; });
 
   function carteiraPageTemplate() {
-    return '<div class="breadcrumb"><span class="crumb-muted">Macro Planeamento</span><span class="crumb-sep">/</span><span class="crumb-current">Carteira de Encomendas</span></div><div class="content-card" id="carteiraCard"></div>';
+    return '<div class="content-card" id="carteiraCard"></div>';
   }
 
   function bindCarteiraControls() { renderCarteiraBody(); }
@@ -2722,36 +2722,60 @@
 
   function bindOfsPorLiberarControls() { renderOfsPorLiberarBody(); }
 
+  var ofsPorLiberarSelected = {};
+
   function renderOfsPorLiberarBody() {
     var card = document.getElementById('ofsPorLiberarCard');
+    var nSelected = Object.keys(ofsPorLiberarSelected).filter(function (k) { return ofsPorLiberarSelected[k]; }).length;
     var toolbar = '<div class="prod-toolbar">' +
       '<button class="icon-inline-btn" id="ofsPorLiberarInfo" title="OFs pendentes de liberação para produção">ⓘ</button>' +
       '<div class="stat-inline">' + OFS_POR_LIBERAR_ROWS.length + ' OFs</div>' +
       '<div class="toolbar-spacer"></div>' +
+      '<button class="btn btn-success" id="ofsPorLiberarLiberar">' + svg('check', 'width="14" height="14"') + ' LIBERAR' + (nSelected ? ' (' + nSelected + ')' : '') + '</button>' +
       '<button class="btn btn-primary" id="ofsPorLiberarExportar">' + svg('download', 'width="14" height="14"') + ' EXPORTAR</button>' +
       '</div>';
-    var rowsHtml = OFS_POR_LIBERAR_ROWS.map(function (r) {
-      return '<tr><td>' + r.centro + '</td><td>' + r.material + '</td><td>' + r.texto + '</td><td>' + r.componente + '</td>' +
+    var rowsHtml = OFS_POR_LIBERAR_ROWS.map(function (r, idx) {
+      return '<tr><td class="prod-cell"><input type="checkbox" data-ofsliberar-select="' + idx + '"' + (ofsPorLiberarSelected[idx] ? ' checked' : '') + '></td><td>' + r.centro + '</td><td>' + r.material + '</td><td>' + r.texto + '</td><td>' + r.componente + '</td>' +
         '<td>' + (r.cliente || '<span style="color:var(--text-muted)">—</span>') + '</td><td>' + r.ordem + '</td>' +
         '<td class="prod-cell">' + r.tipo + '</td><td class="prod-cell">' + r.qtd + '</td>' +
         '<td>' + r.inicio + '</td><td>' + r.fim + '</td>' +
         '<td class="prod-cell">' + (r.alerta ? '<span class="stat-pill pill-warn">⚠</span>' : '<span class="stat-pill pill-neutral">—</span>') + '</td></tr>';
     }).join('');
-    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Centro de Trabalho</th><th>Material de Produção</th><th>Texto Breve Material</th><th>Componente</th><th>Cliente</th><th>Ordem Produção / Planeada</th><th>Tipo Ordem</th><th>Qtd. Total Ordem</th><th>Data Início Produção</th><th>Data Fim Produção</th><th>Alertas</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>';
+    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th></th><th>Centro de Trabalho</th><th>Material de Produção</th><th>Texto Breve Material</th><th>Componente</th><th>Cliente</th><th>Ordem Produção / Planeada</th><th>Tipo Ordem</th><th>Qtd. Total Ordem</th><th>Data Início Produção</th><th>Data Fim Produção</th><th>Alertas</th></tr></thead><tbody>' + (rowsHtml || '<tr><td colspan="11"><div class="empty-state">Sem OFs por liberar.</div></td></tr>') + '</tbody></table></div>';
     card.innerHTML = toolbar + table + '<div class="table-footer">Linhas por página <select class="filter-select" style="min-width:60px" disabled><option>50</option></select><span class="toolbar-spacer"></span>1-' + OFS_POR_LIBERAR_ROWS.length + ' of ' + OFS_POR_LIBERAR_ROWS.length + '</div>';
     document.getElementById('ofsPorLiberarInfo').addEventListener('click', function () { showToast('Lista de OFs de produção/planeadas pendentes de liberação (protótipo)'); });
     document.getElementById('ofsPorLiberarExportar').addEventListener('click', function () { showToast('Exportação gerada (protótipo)'); });
+    card.querySelectorAll('[data-ofsliberar-select]').forEach(function (cb) {
+      cb.addEventListener('change', function () {
+        ofsPorLiberarSelected[cb.getAttribute('data-ofsliberar-select')] = cb.checked;
+        renderOfsPorLiberarBody();
+      });
+    });
+    document.getElementById('ofsPorLiberarLiberar').addEventListener('click', function () {
+      var idxs = Object.keys(ofsPorLiberarSelected).filter(function (k) { return ofsPorLiberarSelected[k]; }).map(Number).sort(function (a, b) { return b - a; });
+      if (!idxs.length) { showToast('Selecione pelo menos uma OF'); return; }
+      idxs.forEach(function (i) { OFS_POR_LIBERAR_ROWS.splice(i, 1); });
+      ofsPorLiberarSelected = {};
+      showToast(idxs.length + ' OF(s) liberada(s)');
+      rerenderOfsPorLiberarPage();
+    });
+  }
+
+  function rerenderOfsPorLiberarPage() {
+    var main = document.getElementById('mainContent');
+    main.innerHTML = '<div class="section-page">' + ofsPorLiberarPageTemplate() + '</div>';
+    bindOfsPorLiberarControls();
   }
 
   /* ==================================================================
      Gestão de OFs > OFs Semanais
      ================================================================== */
   var OFS_SEMANAIS_ROWS = [
-    { centro: 'ACQ001', kanban: 'SEM30/26-ACQ', material: 'RT ACQ 45X25 4/5 PRE-ACQ', codigoMat: '60029975', tipo: 'ZACQ', qtd: 125, of: '1102072459' },
-    { centro: 'ACQ001', kanban: 'SEM30/26-ACQ', material: 'RT ACQ 45X26 2 NATURAL PVF', codigoMat: '60018748', tipo: 'ZACQ', qtd: 100, of: '1102072453' },
-    { centro: 'ACQ001', kanban: 'SEM30/26-ACQ', material: 'RT ACQ 45X24 5 ROSADO PVF', codigoMat: '60018683', tipo: 'ZACQ', qtd: 500, of: '1102072450' },
-    { centro: 'ACQ001', kanban: 'SEM30/26-ACQ', material: 'RT ACQ 45X26 4/5 PRE-ACQ', codigoMat: '60029970', tipo: 'ZACQ', qtd: 500, of: '1102072458' },
-    { centro: 'ACQ001', kanban: 'SEM30/26-ACQ', material: 'RT ACQ 49X24 4 BRANCO PVF', codigoMat: '60018791', tipo: 'ZACQ', qtd: 270, of: '1102072454' }
+    { centro: 'EMA001', kanban: 'SEM30/26-ESC', material: 'ROLHA NAT 45X25 4/5 PRE-ESC', codigoMat: '60029975', tipo: 'ZESC', qtd: 125, of: '1102072459' },
+    { centro: 'EMA001', kanban: 'SEM30/26-ESC', material: 'ROLHA NAT 24x45 2 NATURAL PVF', codigoMat: '60018748', tipo: 'ZESC', qtd: 100, of: '1102072453' },
+    { centro: 'EMB001', kanban: 'SEM30/26-EMB', material: 'ROLHA NAT 45X24 5 ROSADO PVF', codigoMat: '60018683', tipo: 'ZEMB', qtd: 500, of: '1102072450' },
+    { centro: 'MFO001', kanban: 'SEM30/26-MAR', material: 'ROLHA COL 24x49 4/5 PRE-ESC', codigoMat: '60029970', tipo: 'ZMAR', qtd: 500, of: '1102072458' },
+    { centro: 'EMB002', kanban: 'SEM30/26-EM2', material: 'ROLHA NAT 49X24 4 BRANCO PVF', codigoMat: '60018791', tipo: 'ZEMB', qtd: 270, of: '1102072454' }
   ];
   var ofsSemanaisState = { busca: '', slotCentro: false, weekMonday: getWeekMonday(new Date()) };
 
@@ -2878,25 +2902,25 @@
      Gestão de OFs > Lista Standard
      ================================================================== */
   var LISTA_STANDARD_ROWS = [
-    { workcenter: 'ACQ001', material: '60018271', descricao: 'RT ACQ 39X25 3/4 BRANCO PVF', qtd: 150 },
-    { workcenter: 'ACQ001', material: '60018341', descricao: 'RT ACQ 45X25 4 BRANCO PVF', qtd: 60 },
-    { workcenter: 'ACQ001', material: '60018360', descricao: 'RT ACQ 45X26 4/5 BRANCO PVF', qtd: 435 },
-    { workcenter: 'ACQ001', material: '60018538', descricao: 'RT ACQ 38X24 4 BRANCO PVF', qtd: 80 },
-    { workcenter: 'ACQ001', material: '60018542', descricao: 'RT ACQ 38X24 4 ROSADO PVF', qtd: 190 },
-    { workcenter: 'ACQ001', material: '60018575', descricao: 'RT ACQ 38X24 6 CF BRANCO PVF', qtd: 1025 },
-    { workcenter: 'ACQ001', material: '60018580', descricao: 'RT ACQ 38X24 6 CF ROSADO PVF', qtd: 115 },
-    { workcenter: 'ACQ001', material: '60018622', descricao: 'RT ACQ 45X24 2 NATURAL PVF', qtd: 125 },
-    { workcenter: 'ACQ001', material: '60018645', descricao: 'RT ACQ 45X24 3 NOVA PVF', qtd: 200 },
-    { workcenter: 'ACQ001', material: '60018653', descricao: 'RT ACQ 45X24 4 BRANCO PVF', qtd: 2765 },
-    { workcenter: 'ACQ001', material: '60018657', descricao: 'RT ACQ 45X24 4 ROSADO PVF', qtd: 640 },
-    { workcenter: 'ACQ001', material: '60018679', descricao: 'RT ACQ 45X24 5 BRANCO PVF', qtd: 850 },
-    { workcenter: 'ACQ001', material: '60018683', descricao: 'RT ACQ 45X24 5 ROSADO PVF', qtd: 500 },
-    { workcenter: 'ACQ001', material: '60018706', descricao: 'RT ACQ 45X24 6 CF BRANCO PVF', qtd: 75 },
-    { workcenter: 'ACQ001', material: '60018711', descricao: 'RT ACQ 45X24 6 CF ROSADO PVF', qtd: 305 },
-    { workcenter: 'ACQ001', material: '60018748', descricao: 'RT ACQ 45X26 2 NATURAL PVF', qtd: 100 },
-    { workcenter: 'ACQ001', material: '60018791', descricao: 'RT ACQ 49X24 4 BRANCO PVF', qtd: 270 },
-    { workcenter: 'ACQ001', material: '60018803', descricao: 'RT ACQ 49X24 5 BRANCO PVF', qtd: 45 },
-    { workcenter: 'ACQ001', material: '60018805', descricao: 'RT ACQ 49X24 5 ROSADO PVF', qtd: 90 }
+    { workcenter: 'EMB001', material: '60018271', descricao: 'ROLHA NAT 39X25 3/4 BRANCO PVF', qtd: 150 },
+    { workcenter: 'EMB001', material: '60018341', descricao: 'ROLHA NAT 45X25 4 BRANCO PVF', qtd: 60 },
+    { workcenter: 'EMB001', material: '60018360', descricao: 'ROLHA NAT 45X26 4/5 BRANCO PVF', qtd: 435 },
+    { workcenter: 'EMB001', material: '60018538', descricao: 'ROLHA NAT 38X24 4 BRANCO PVF', qtd: 80 },
+    { workcenter: 'EMB001', material: '60018542', descricao: 'ROLHA NAT 38X24 4 ROSADO PVF', qtd: 190 },
+    { workcenter: 'EMB001', material: '60018575', descricao: 'ROLHA NAT 38X24 6 CF BRANCO PVF', qtd: 1025 },
+    { workcenter: 'EMB001', material: '60018580', descricao: 'ROLHA NAT 38X24 6 CF ROSADO PVF', qtd: 115 },
+    { workcenter: 'EMB002', material: '60018622', descricao: 'ROLHA NAT 45X24 2 NATURAL PVF', qtd: 125 },
+    { workcenter: 'EMB002', material: '60018645', descricao: 'ROLHA NAT 45X24 3 NOVA PVF', qtd: 200 },
+    { workcenter: 'EMB002', material: '60018653', descricao: 'ROLHA NAT 45X24 4 BRANCO PVF', qtd: 2765 },
+    { workcenter: 'EMB002', material: '60018657', descricao: 'ROLHA NAT 45X24 4 ROSADO PVF', qtd: 640 },
+    { workcenter: 'EMB002', material: '60018679', descricao: 'ROLHA NAT 45X24 5 BRANCO PVF', qtd: 850 },
+    { workcenter: 'EMB002', material: '60018683', descricao: 'ROLHA NAT 45X24 5 ROSADO PVF', qtd: 500 },
+    { workcenter: 'EMB001', material: '60018706', descricao: 'ROLHA NAT 45X24 6 CF BRANCO PVF', qtd: 75 },
+    { workcenter: 'EMB001', material: '60018711', descricao: 'ROLHA NAT 45X24 6 CF ROSADO PVF', qtd: 305 },
+    { workcenter: 'EMA001', material: '60018748', descricao: 'ROLHA NAT 45X26 2 NATURAL PVF', qtd: 100 },
+    { workcenter: 'EMB001', material: '60018791', descricao: 'ROLHA NAT 49X24 4 BRANCO PVF', qtd: 270 },
+    { workcenter: 'EMB001', material: '60018803', descricao: 'ROLHA NAT 49X24 5 BRANCO PVF', qtd: 45 },
+    { workcenter: 'EMB001', material: '60018805', descricao: 'ROLHA NAT 49X24 5 ROSADO PVF', qtd: 90 }
   ];
 
   function ofsListaStandardPageTemplate() {
@@ -2921,7 +2945,7 @@
      ================================================================== */
   var ofsConfigState = { tab: 'autoGeracao' };
   var OFS_CONFIG_ROWS = [
-    { workcenter: 'ACQ001', categoria: 'Lista Standard', consumos: true, sources: '—', lookbehind: 0 },
+    { workcenter: 'EMB001', categoria: 'Lista Standard', consumos: true, sources: '—', lookbehind: 0 },
     { workcenter: 'AE1001', categoria: 'Sequenciamento', consumos: false, sources: '—', lookbehind: 0 },
     { workcenter: 'BRA001', categoria: 'Sequenciamento', consumos: true, sources: '—', lookbehind: 0 },
     { workcenter: 'BRA001', categoria: 'Lista Standard', consumos: true, sources: '—', lookbehind: 0 },
