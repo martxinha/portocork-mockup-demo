@@ -1228,6 +1228,7 @@
   var HEADER_TITLES = {
     home: 'Homepage',
     encomendasPlanear: 'Encomendas por Planear',
+    carteiraEncomendas: 'Carteira de Encomendas',
     cargaCapacidade: 'Carga Capacidade',
     simulacao: 'Simulação',
     sequenciamento: 'Sequenciamento',
@@ -1252,6 +1253,7 @@
       title: 'Macro Planeamento',
       submenu: [
         { key: 'encomendasPlanear', title: 'Encomendas por Planear' },
+        { key: 'carteiraEncomendas', title: 'Carteira de Encomendas' },
         { key: 'cargaCapacidade', title: 'Carga Capacidade' },
         { key: 'simulacao', title: 'Simulação' }
       ]
@@ -1690,7 +1692,9 @@
     { ov: '92562/10', of: 'OF-15206', processo: 'EMA001 · Escolha', artigo: 'ROLHA TN 24x45', calibre: '24x45', classe: 'Extra', lavacao: 'Natural', objetivoBase: 500, seed: 7.8 },
     { ov: '92563/10', of: 'OF-15207', processo: 'LAV001 · Lavação', artigo: 'ROLHA TN 24x45', calibre: '24x45', classe: 'Extra', lavacao: 'Natural', objetivoBase: 480, seed: 8.1 },
     { ov: '92564/10', of: 'OF-15208', processo: 'EMB002 · Embalagem', artigo: 'ROLHA NAT 24x49', calibre: '24x49', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 220, seed: 9.5 },
-    { ov: '30410/10', of: 'OF-15209', processo: 'MTI001 · Marcação', artigo: 'ROLHA COL 24x38', calibre: '24x38', classe: 'Segunda', lavacao: 'Rosé', objetivoBase: 190, seed: 10.2 }
+    { ov: '30410/10', of: 'OF-15209', processo: 'MTI001 · Marcação', artigo: 'ROLHA COL 24x38', calibre: '24x38', classe: 'Segunda', lavacao: 'Rosé', objetivoBase: 190, seed: 10.2 },
+    { ov: '48120/10', of: 'OF-15210', processo: 'EMA001 · Escolha', artigo: 'ROLHA NAT 24x49', calibre: '24x49', classe: 'Primeira', lavacao: 'Natural', objetivoBase: null, seed: 11.6 },
+    { ov: '55870/10', of: 'OF-15211', processo: 'MFO001 · Marcação', artigo: 'ROLHA TN 24x38', calibre: '24x38', classe: 'Extra', lavacao: 'Clássica', objetivoBase: null, seed: 12.3 }
   ];
 
   var STOCK_ROWS = [
@@ -1715,6 +1719,13 @@
     '62321/40': [
       { of: 'OF-15202', tipo: 'Data de Fornecedor', prevista: '2026-07-22', real: '2026-07-25', ltAtraso: 3 },
       { of: 'OF-15202', tipo: 'Data de Expedição', prevista: '2026-07-24', real: '2026-07-24', ltAtraso: 0 }
+    ],
+    '4600036950/10': [
+      { of: '1101925559', tipo: 'Data de Fornecedor (STO)', prevista: '2026-03-01', real: '2026-03-05', ltAtraso: 4 }
+    ],
+    '4600036331/10': [
+      { of: 'OF-15210', tipo: 'Data de Fornecedor (STO)', prevista: '2026-06-10', real: '2026-06-16', ltAtraso: 6 },
+      { of: 'OF-15210', tipo: 'Data de Remessa', prevista: '2026-06-17', real: '', ltAtraso: 0 }
     ]
   };
 
@@ -1724,6 +1735,7 @@
   }
 
   function genDay(seed, dayIndex, base) {
+    if (base == null) return { producao: null, objetivo: null };
     var p1 = pseudo(seed * 13.7 + dayIndex * 3.3);
     var p2 = pseudo(seed * 7.1 + dayIndex * 5.9);
     var objetivo = Math.round(base * (0.85 + p2 * 0.3) * 100) / 100;
@@ -1775,6 +1787,7 @@
     days.forEach(function (day, di) {
       if (isFutureDay(day)) return;
       rows.forEach(function (row) {
+        if (row.objetivoBase == null) return;
         var v = genDay(row.seed, di, row.objetivoBase);
         total += v.producao / v.objetivo;
         count++;
@@ -1791,6 +1804,7 @@
       if (!future) {
         var total = 0, count = 0;
         rows.forEach(function (row) {
+          if (row.objetivoBase == null) return;
           var v = genDay(row.seed, di, row.objetivoBase);
           total += v.producao / v.objetivo;
           count++;
@@ -1807,7 +1821,8 @@
     var centrosUnicos = ['Todos'].concat(PLANO_ROWS.map(planoProcessoCentro).filter(function (v, i, a) { return a.indexOf(v) === i; }));
     var rows = PLANO_ROWS.filter(function (r) {
       return (prodState.processoEtapa === 'Todos' || planoProcessoEtapa(r) === prodState.processoEtapa) &&
-        (prodState.processoCentro === 'Todos' || planoProcessoCentro(r) === prodState.processoCentro);
+        (prodState.processoCentro === 'Todos' || planoProcessoCentro(r) === prodState.processoCentro) &&
+        (prodState.incluirSemPlano || r.objetivoBase != null);
     });
 
     var toolbar = '<div class="prod-toolbar">' + weekNavHtml() +
@@ -1818,23 +1833,19 @@
       '<div class="progress-indicator">Progresso da Semana<strong>' + progressAvg(rows) + '%</strong></div>' +
       '</div>';
 
-    var head = '<thead><tr><th rowspan="2">OV</th><th rowspan="2">OF</th><th rowspan="2">Processo Atual</th><th rowspan="2">Artigo</th>' + dayHeaderCells(rows) + '<th rowspan="2">Histórico de Datas</th></tr><tr>' +
+    var head = '<thead><tr><th rowspan="2">OV</th><th rowspan="2">OF</th><th rowspan="2">Processo Atual</th><th rowspan="2">Artigo</th>' + dayHeaderCells(rows) + '</tr><tr>' +
       days.map(function () { return '<th>Produção</th><th>Objetivo</th><th>%</th>'; }).join('') + '</tr></thead>';
 
     var body = '<tbody>' + rows.map(function (row) {
       var cells = days.map(function (day, di) {
-        if (isFutureDay(day)) {
+        if (isFutureDay(day) || row.objetivoBase == null) {
           return '<td class="prod-cell"><span class="row-expand muted">+</span>—</td><td class="prod-cell">—</td><td class="prod-cell">' + pctPill(null) + '</td>';
         }
         var v = genDay(row.seed, di, row.objetivoBase);
         var pct = Math.round((v.producao / v.objetivo) * 100);
         return '<td class="prod-cell"><span class="row-expand">+</span>' + fmt2(v.producao) + '</td><td class="prod-cell">' + fmt2(v.objetivo) + '</td><td class="prod-cell">' + pctPill(pct) + '</td>';
       }).join('');
-      var ltAtraso = Math.round((pseudo(row.seed + 50) - 0.3) * 7 * 10) / 10;
-      var ltTone = ltAtraso > 0 ? 'pill-bad' : ltAtraso === 0 ? 'pill-neutral' : 'pill-good';
-      var ltLabel = (ltAtraso > 0 ? '+' : '') + fmt2(ltAtraso) + ' d';
-      var histCell = '<td class="prod-cell"><span class="stat-pill ' + ltTone + '" style="margin-right:6px;">' + ltLabel + '</span><button class="icon-inline-btn hist-btn" data-ov="' + row.ov + '" title="Consultar histórico de datas">' + svg('calmonth', 'width="14" height="14"') + '</button></td>';
-      return '<tr><td>' + row.ov + '</td><td>' + row.of + '</td><td>' + row.processo + '</td><td>' + row.artigo + '</td>' + cells + histCell + '</tr>';
+      return '<tr' + (row.objetivoBase == null ? ' style="opacity:0.6;"' : '') + '><td>' + row.ov + '</td><td>' + row.of + '</td><td>' + row.processo + '</td><td>' + row.artigo + '</td>' + cells + '</tr>';
     }).join('') + '</tbody>';
 
     return toolbar + '<div class="prod-table-wrap"><table class="prod-table">' + head + body + '</table></div>';
@@ -1914,7 +1925,8 @@
     var centrosUnicos = ['Todos'].concat(PLANO_ROWS.map(planoProcessoCentro).filter(function (v, i, a) { return a.indexOf(v) === i; }));
     var rows = PLANO_ROWS.filter(function (r) {
       return (prodState.processoEtapa === 'Todos' || planoProcessoEtapa(r) === prodState.processoEtapa) &&
-        (prodState.processoCentro === 'Todos' || planoProcessoCentro(r) === prodState.processoCentro);
+        (prodState.processoCentro === 'Todos' || planoProcessoCentro(r) === prodState.processoCentro) &&
+        r.objetivoBase != null;
     });
 
     var toolbar = '<div class="prod-toolbar">' + weekNavHtml() +
@@ -1952,7 +1964,8 @@
     var centrosUnicos = ['Todos'].concat(PLANO_ROWS.map(planoProcessoCentro).filter(function (v, i, a) { return a.indexOf(v) === i; }));
     var filtered = PLANO_ROWS.filter(function (r) {
       return (prodState.processoEtapa === 'Todos' || planoProcessoEtapa(r) === prodState.processoEtapa) &&
-        (prodState.processoCentro === 'Todos' || planoProcessoCentro(r) === prodState.processoCentro);
+        (prodState.processoCentro === 'Todos' || planoProcessoCentro(r) === prodState.processoCentro) &&
+        r.objetivoBase != null;
     });
     var rows = filtered.map(function (r) {
       var totalPlaneado = r.objetivoBase * 5;
@@ -2050,10 +2063,6 @@
     if (incluirSwitch) incluirSwitch.addEventListener('click', function () {
       prodState.incluirSemPlano = !prodState.incluirSemPlano;
       renderProducaoBody();
-    });
-
-    body.querySelectorAll('.hist-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () { openHistoricoModal(btn.getAttribute('data-ov')); });
     });
   }
 
@@ -2435,6 +2444,201 @@
     card.querySelectorAll('.icon-inline-btn:not([data-balanco-idx])').forEach(function (btn) {
       btn.addEventListener('click', function () { showToast((btn.title || 'Ação') + ' (protótipo)'); });
     });
+  }
+
+  /* ==================================================================
+     Carteira de Encomendas
+     ================================================================== */
+  var CARTEIRA_ROWS = [
+    { ov: '4600036116/10', descCliente: 'CASA VINHOS DA QUINTA, LDA.', material: '60023393', descMaterial: 'RT NAT 54X25 CF CLEAR M T E', artigoCliente: 'RT NAT 54X25...', data: '2025-12-18', dataPedida: '2025-12-19', qtd: 25, qtdFalta: 0, of: '1101863403', stockExp: '290 / 290', plan: 'P', statusOk: true, processoAtual: 'EMBALADO', txtPr: '', amPs: ['AM'] },
+    { ov: '4600036950/10', descCliente: 'ADEGA DO MONTE, LDA.', material: '60023422', descMaterial: 'RT NAT 54X26 CF CLEAR M T E', artigoCliente: 'RT NAT 54X26...', data: '2026-03-05', dataPedida: '2026-03-06', qtd: 20, qtdFalta: 0, of: '1101925559', stockExp: '5 / 5', plan: 'P', statusOk: true, processoAtual: 'EMBALADO', txtPr: '', amPs: ['AM'] },
+    { ov: '4600036330/30', descCliente: 'BODEGAS DEL NORTE, S.L.', material: '60023292', descMaterial: 'RT NAT 49X26 CF CLEAR M T E', artigoCliente: 'RT NAT 49X26...', data: '2026-04-30', dataPedida: '2026-05-04', qtd: 60, qtdFalta: 0, of: '1101876027', stockExp: '550 / 550', plan: 'P', statusOk: true, processoAtual: 'EMBALADO', txtPr: '', amPs: ['AM'] },
+    { ov: '4600036001/50', descCliente: 'CANTINE DEL SUD, S.R.L.', material: '60023292', descMaterial: 'RT NAT 49X26 CF CLEAR M T E', artigoCliente: 'RT NAT 49X26...', data: '2026-05-08', dataPedida: '2026-05-11', qtd: 60, qtdFalta: 0, of: '1101856404', stockExp: '550 / 550', plan: 'P', statusOk: true, processoAtual: 'EMBALADO', txtPr: '', amPs: ['AM'] },
+    { ov: '4600038599/10', descCliente: 'QUINTA DO VALE VERDE, S.A.', material: '60022914', descMaterial: 'RT NAT 45X24 CF CLEAR M T E', artigoCliente: 'RT NAT 45X24...', data: '2026-05-14', dataPedida: '2026-05-15', qtd: 80, qtdFalta: 0, of: '1102008093', stockExp: '180 / 180', plan: 'P', statusOk: true, processoAtual: 'EMBALADO', txtPr: '', amPs: ['AM', 'PS'] },
+    { ov: '4600038770/10', descCliente: 'AMORIM CORK ITALIA, S.P.A.', material: '60023412', descMaterial: 'RT NAT 54X26 CF CLEAR M T E', artigoCliente: 'RT NAT 54X26...', data: '2026-05-27', dataPedida: '2026-05-28', qtd: 25, qtdFalta: 0, of: '1102018032', stockExp: '15 / 15', plan: 'P', statusOk: true, processoAtual: 'EMBALADO', txtPr: '', amPs: ['AM'] },
+    { ov: '4600036331/10', descCliente: 'BODEGAS RIOJA ALTA, S.A.', material: '60030495', descMaterial: 'RT NAT 54X24 CF CLEAR M T E', artigoCliente: 'RT NAT 54X24...', data: '2026-06-16', dataPedida: '2026-06-17', qtd: 50, qtdFalta: 12, of: '', stockExp: '0 / 0', plan: 'P', statusOk: true, processoAtual: 'EMBALADO', txtPr: '', amPs: ['AM'] },
+    { ov: '4600037173/10', descCliente: 'ADEGA COOPERATIVA DO VALE, CRL', material: '60023369', descMaterial: 'RT NAT 54X24 CF CLEAR M T E', artigoCliente: 'RT NAT 54X24...', data: '2026-06-18', dataPedida: '2026-06-19', qtd: 50, qtdFalta: 0, of: '1101928692', stockExp: '355 / 355', plan: 'P', statusOk: true, processoAtual: 'EMBALADO', txtPr: '', amPs: ['AM'] }
+  ];
+  var CARTEIRA_ACQUAMARK_ROWS = [
+    { ov: '4600039102/10', descCliente: 'HAMMEKEN CELLARS, S.L.', material: '60041210', descMaterial: 'RT ACQ 49X24 CF CLEAR M T E', artigoCliente: 'RT ACQ 49X24...', data: '2026-06-02', dataPedida: '2026-06-05', qtd: 40, qtdFalta: 0, of: '1102019844', stockExp: '120 / 120', plan: 'P', statusOk: true, processoAtual: 'EMBALADO', txtPr: '', amPs: ['AM'] },
+    { ov: '4600039188/20', descCliente: 'MAISON VIGNERONS, S.A.S.', material: '60041233', descMaterial: 'RT ACQ 45X24 CF CLEAR M T E', artigoCliente: 'RT ACQ 45X24...', data: '2026-06-10', dataPedida: '2026-06-11', qtd: 18, qtdFalta: 3, of: '', stockExp: '0 / 18', plan: 'P', statusOk: false, processoAtual: 'EMBALADO', txtPr: '', amPs: ['AM'] }
+  ];
+  var carteiraState = { tab: 'naturais', busca: '', calibreFiltro: [], semCs: false, qtdFaltaFiltro: false, editadas: false, acumularFiltros: false };
+  var carteiraSelected = {};
+  var carteiraColMenuOpen = false;
+
+  function carteiraRows() { return carteiraState.tab === 'naturais' ? CARTEIRA_ROWS : CARTEIRA_ACQUAMARK_ROWS; }
+  function carteiraCalibre(material) {
+    var m = String(material || '').match(/\d{2,3}(?:[.,]\d+)?X\d{2,3}(?:[.,]\d+)?/i);
+    return m ? m[0].toUpperCase() : 'OUTROS';
+  }
+
+  var CARTEIRA_COLUMNS = [
+    { key: 'descCliente', label: 'Descrição do Cliente', render: function (r) { return r.descCliente; } },
+    { key: 'material', label: 'Material', render: function (r) { return r.material; } },
+    { key: 'descMaterial', label: 'Descrição do Material', render: function (r) { return r.descMaterial; } },
+    { key: 'artigoCliente', label: 'Artigo do Cliente', render: function (r) { return r.artigoCliente; } },
+    { key: 'data', label: 'Data', render: function (r) { return r.data; } },
+    { key: 'dataPedida', label: 'Data Pedida', render: function (r) { return r.dataPedida; } },
+    { key: 'qtd', label: 'Qtd', center: true, render: function (r) { return fmt2(r.qtd); } },
+    { key: 'qtdFalta', label: 'Qtd. Falta', center: true, render: function (r) { return r.qtdFalta > 0 ? '<span style="color:var(--evt-stop);font-weight:700;">' + fmt2(r.qtdFalta) + '</span>' : '0'; } },
+    { key: 'of', label: 'OF', render: function (r) { return r.of || '<span style="color:var(--text-muted)">—</span>'; } },
+    { key: 'stockExp', label: 'Stock Exp', center: true, render: function (r) { return r.stockExp; } },
+    { key: 'plan', label: 'Plan', center: true, render: function (r) { return r.plan; } },
+    { key: 'status', label: 'Status', center: true, render: function (r) { return '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + (r.statusOk ? 'var(--evt-closure)' : 'var(--evt-stop)') + ';"></span>'; } },
+    { key: 'processoAtual', label: 'Processos Atuais', center: true, render: function (r) { return '<span class="tag-pill tag-shared" style="text-transform:none;">' + r.processoAtual + '</span>'; } },
+    { key: 'txtPr', label: 'Txt Pr...', render: function (r) { return r.txtPr || '<span style="color:var(--text-muted)">—</span>'; } },
+    { key: 'amPs', label: 'AM/PS', center: true, render: function (r) { return r.amPs.map(function (a) { return '<span class="stat-pill pill-neutral" style="margin:0 2px;">' + a + '</span>'; }).join(''); } }
+  ];
+  var carteiraColVisible = {};
+  CARTEIRA_COLUMNS.forEach(function (c) { carteiraColVisible[c.key] = true; });
+
+  function carteiraPageTemplate() {
+    return '<div class="breadcrumb"><span class="crumb-muted">Macro Planeamento</span><span class="crumb-sep">/</span><span class="crumb-current">Carteira de Encomendas</span></div><div class="content-card" id="carteiraCard"></div>';
+  }
+
+  function bindCarteiraControls() { renderCarteiraBody(); }
+
+  function renderCarteiraBody() {
+    var card = document.getElementById('carteiraCard');
+    var allRows = carteiraRows();
+    var rows = allRows.filter(function (r) {
+      if (carteiraState.calibreFiltro.length && carteiraState.calibreFiltro.indexOf(carteiraCalibre(r.descMaterial)) === -1) return false;
+      if (carteiraState.semCs && r.of) return false;
+      if (carteiraState.qtdFaltaFiltro && !(r.qtdFalta > 0)) return false;
+      if (carteiraState.busca) {
+        var q = carteiraState.busca.toLowerCase();
+        if ((r.ov + r.descCliente + r.material + r.descMaterial).toLowerCase().indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+    var calibresDisponiveis = Array.from(new Set(allRows.map(function (r) { return carteiraCalibre(r.descMaterial); }))).sort();
+    var visibleCols = CARTEIRA_COLUMNS.filter(function (c) { return carteiraColVisible[c.key]; });
+
+    var tabsHtml = '<div class="prod-tabs" id="carteiraTabs">' +
+      '<div class="prod-tab' + (carteiraState.tab === 'naturais' ? ' active' : '') + '" data-carteiratab="naturais">' + svg('gear', 'width="13" height="13"') + ' NATURAIS</div>' +
+      '<div class="prod-tab' + (carteiraState.tab === 'acquamark' ? ' active' : '') + '" data-carteiratab="acquamark">' + svg('warn', 'width="13" height="13"') + ' ACQUAMARK</div>' +
+      '</div>';
+
+    var toolbar1 = '<div class="prod-toolbar">' +
+      '<input type="text" class="filter-select" id="carteiraBusca" placeholder="Pesquisar..." style="min-width:220px;" value="' + escapeHtml(carteiraState.busca) + '">' +
+      '<button class="btn" id="carteiraLimparFiltros">' + svg('warn', 'width="13" height="13"') + ' Limpar Filtros</button>' +
+      '<div class="switch-row"><div class="switch' + (carteiraState.acumularFiltros ? ' on' : '') + '" id="carteiraAcumular"><div class="thumb"></div></div>Acumular filtros</div>' +
+      '<div class="toolbar-spacer"></div>' +
+      '<div class="action-dropdown"><button class="btn" id="carteiraColunas">' + svg('grid', 'width="14" height="14"') + ' Colunas Visíveis (' + visibleCols.length + '/' + CARTEIRA_COLUMNS.length + ')</button>' +
+      '<div class="action-dropdown-menu' + (carteiraColMenuOpen ? ' open' : '') + '" id="carteiraColunasMenu" style="max-height:280px;overflow-y:auto;min-width:220px;">' +
+      CARTEIRA_COLUMNS.map(function (c) {
+        return '<label class="action-dropdown-item" style="cursor:pointer;"><input type="checkbox" data-carteira-col-toggle="' + c.key + '"' + (carteiraColVisible[c.key] ? ' checked' : '') + ' style="margin-right:6px;"> ' + c.label + '</label>';
+      }).join('') +
+      '</div></div>' +
+      '<button class="btn" id="carteiraNormalizarDatas">' + svg('calmonth', 'width="14" height="14"') + ' Normalizar Datas (' + allRows.filter(function (r) { return r.dataPedida !== r.data; }).length + ')</button>' +
+      '<button class="btn" id="carteiraImportar">' + svg('upload', 'width="14" height="14"') + ' Importar</button>' +
+      '<button class="btn" id="carteiraAtualizarNotas">' + svg('pencil', 'width="14" height="14"') + ' Atualizar notas</button>' +
+      '<button class="btn btn-primary" id="carteiraAtualizar">' + svg('refresh', 'width="14" height="14"') + ' Atualizar</button>' +
+      '</div>';
+
+    var toolbar2 = '<div class="prod-toolbar">' +
+      '<div class="filter-label" style="align-self:center;">FILTRAR POR</div><div class="chip-group">' +
+      calibresDisponiveis.map(function (c) {
+        return '<div class="chip-filter' + (carteiraState.calibreFiltro.indexOf(c) !== -1 ? ' active' : '') + '" data-carteira-calibre="' + c + '">' + c + '</div>';
+      }).join('') +
+      '<div class="chip-filter' + (carteiraState.semCs ? ' active' : '') + '" data-carteira-flag="semCs">Sem C\'s</div>' +
+      '<div class="chip-filter' + (carteiraState.qtdFaltaFiltro ? ' active' : '') + '" data-carteira-flag="qtdFaltaFiltro">Qtd. em falta &gt; 0</div>' +
+      '<div class="chip-filter' + (carteiraState.editadas ? ' active' : '') + '" data-carteira-flag="editadas">Editadas</div>' +
+      '</div>' +
+      '<div class="toolbar-spacer"></div>' +
+      '<div class="stat-inline">' + rows.length + '</div>' +
+      '</div>';
+
+    var rowsHtml = rows.map(function (r) {
+      var trueIdx = allRows.indexOf(r);
+      return '<tr>' +
+        '<td class="prod-cell"><input type="checkbox" data-carteira-select="' + r.ov + '"' + (carteiraSelected[r.ov] ? ' checked' : '') + '></td>' +
+        '<td class="prod-cell">' + (trueIdx + 1) + '</td>' +
+        '<td>' + r.ov + '</td>' +
+        visibleCols.map(function (c) { return '<td' + (c.center ? ' class="prod-cell"' : '') + '>' + c.render(r) + '</td>'; }).join('') +
+        '<td class="prod-cell"><button class="icon-inline-btn" data-carteira-hist="' + r.ov + '" title="Histórico de Datas">' + svg('calmonth', 'width="14" height="14"') + '</button><button class="icon-inline-btn" title="Exportar">' + svg('download', 'width="14" height="14"') + '</button></td>' +
+        '</tr>';
+    }).join('');
+
+    var table = '<div class="prod-table-wrap"><table class="prod-table table-compact"><thead><tr>' +
+      '<th></th><th>#</th><th>Encomenda / Item</th>' +
+      visibleCols.map(function (c) { return '<th>' + c.label + '</th>'; }).join('') +
+      '<th></th>' +
+      '</tr></thead><tbody>' + (rowsHtml || '<tr><td colspan="' + (visibleCols.length + 4) + '"><div class="empty-state">Sem encomendas para este filtro.</div></td></tr>') + '</tbody></table></div>';
+    var footer = '<div class="table-footer">Linhas por página <select class="filter-select" style="min-width:70px" disabled><option>100</option></select><span class="toolbar-spacer"></span>1-' + rows.length + ' of ' + rows.length + '</div>';
+
+    card.innerHTML = tabsHtml + toolbar1 + toolbar2 + table + footer;
+
+    document.querySelectorAll('#carteiraTabs .prod-tab').forEach(function (tabEl) {
+      tabEl.addEventListener('click', function () {
+        carteiraState.tab = tabEl.getAttribute('data-carteiratab');
+        if (!carteiraState.acumularFiltros) carteiraState.calibreFiltro = [];
+        renderCarteiraBody();
+      });
+    });
+    document.getElementById('carteiraBusca').addEventListener('input', function (e) { carteiraState.busca = e.target.value; renderCarteiraBody(); });
+    document.getElementById('carteiraLimparFiltros').addEventListener('click', function () {
+      carteiraState.busca = '';
+      carteiraState.calibreFiltro = [];
+      carteiraState.semCs = false;
+      carteiraState.qtdFaltaFiltro = false;
+      carteiraState.editadas = false;
+      renderCarteiraBody();
+      showToast('Filtros limpos');
+    });
+    document.getElementById('carteiraAcumular').addEventListener('click', function () {
+      carteiraState.acumularFiltros = !carteiraState.acumularFiltros;
+      renderCarteiraBody();
+    });
+    card.querySelectorAll('[data-carteira-calibre]').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        toggleChip(carteiraState.calibreFiltro, chip.getAttribute('data-carteira-calibre'));
+        renderCarteiraBody();
+      });
+    });
+    card.querySelectorAll('[data-carteira-flag]').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var flag = chip.getAttribute('data-carteira-flag');
+        carteiraState[flag] = !carteiraState[flag];
+        renderCarteiraBody();
+      });
+    });
+    card.querySelectorAll('[data-carteira-select]').forEach(function (cb) {
+      cb.addEventListener('change', function () { carteiraSelected[cb.getAttribute('data-carteira-select')] = cb.checked; });
+    });
+    card.querySelectorAll('[data-carteira-hist]').forEach(function (btn) {
+      btn.addEventListener('click', function () { openHistoricoModal(btn.getAttribute('data-carteira-hist')); });
+    });
+    card.querySelectorAll('.icon-inline-btn[title="Exportar"]').forEach(function (btn) {
+      btn.addEventListener('click', function () { showToast('Exportar (protótipo)'); });
+    });
+    function closeCarteiraMenus() { card.querySelectorAll('.action-dropdown-menu.open').forEach(function (m) { m.classList.remove('open'); }); carteiraColMenuOpen = false; }
+    document.getElementById('carteiraColunas').addEventListener('click', function (e) {
+      e.stopPropagation();
+      var btn = e.currentTarget, menu = document.getElementById('carteiraColunasMenu');
+      var open = menu.classList.contains('open');
+      closeCarteiraMenus();
+      if (!open) { carteiraColMenuOpen = true; positionFixedDropdown(menu, btn); menu.classList.add('open'); }
+    });
+    card.querySelectorAll('[data-carteira-col-toggle]').forEach(function (cb) {
+      cb.addEventListener('click', function (e) { e.stopPropagation(); });
+      cb.addEventListener('change', function () {
+        carteiraColVisible[cb.getAttribute('data-carteira-col-toggle')] = cb.checked;
+        renderCarteiraBody();
+        requestAnimationFrame(function () {
+          var menu = document.getElementById('carteiraColunasMenu'), btn = document.getElementById('carteiraColunas');
+          if (menu && btn) positionFixedDropdown(menu, btn);
+        });
+      });
+    });
+    document.getElementById('carteiraNormalizarDatas').addEventListener('click', function () { showToast('Datas normalizadas (protótipo)'); });
+    document.getElementById('carteiraImportar').addEventListener('click', function () { showToast('Importação (protótipo)'); });
+    document.getElementById('carteiraAtualizarNotas').addEventListener('click', function () { showToast('Notas atualizadas (protótipo)'); });
+    document.getElementById('carteiraAtualizar').addEventListener('click', function () { showToast('Carteira atualizada (protótipo)'); });
+    if (encDocClickHandler) document.removeEventListener('click', encDocClickHandler);
+    encDocClickHandler = closeCarteiraMenus;
+    document.addEventListener('click', encDocClickHandler);
   }
 
   /* ==================================================================
@@ -4312,11 +4516,17 @@
 
   /* ---------------- Configurações > Recursos ---------------- */
   var GRUPOS_CENTROS_TRABALHO = [
-    { grupo: 'Escolha', centros: 'EMA001, EET004, EET005' },
-    { grupo: 'Lavação', centros: 'LAV001' },
-    { grupo: 'Tratamento', centros: 'TRT001, TRT002' },
-    { grupo: 'Marcação', centros: 'MLS001, MFO001, MTI001' },
-    { grupo: 'Embalagem', centros: 'EMB001, EMB002' }
+    { centro: 'EMA001', grupo: 'Escolha' },
+    { centro: 'EET004', grupo: 'Escolha' },
+    { centro: 'EET005', grupo: 'Escolha' },
+    { centro: 'LAV001', grupo: 'Lavação' },
+    { centro: 'TRT001', grupo: 'Tratamento' },
+    { centro: 'TRT002', grupo: 'Tratamento' },
+    { centro: 'MLS001', grupo: 'Marcação' },
+    { centro: 'MFO001', grupo: 'Marcação' },
+    { centro: 'MTI001', grupo: 'Marcação' },
+    { centro: 'EMB001', grupo: 'Embalagem' },
+    { centro: 'EMB002', grupo: 'Embalagem' }
   ];
 
   var TURNOS_SUB_TABS = [
@@ -4631,7 +4841,7 @@
     { key: 'setups', label: 'Setups' },
     { key: 'leadtimes', label: 'Lead Times' },
     { key: 'acordosLogisticos', label: 'Acordos Logísticos' },
-    { key: 'gruposCentros', label: 'Grupos de Centros de Trabalho' },
+    { key: 'gruposCentros', label: 'Centros de Trabalho' },
     { key: 'prioridades', label: 'Prioridades' },
     { key: 'restricoes', label: 'Restrições' },
     { key: 'mapeamentoDepositos', label: 'Mapeamento de Depósitos' },
@@ -4742,7 +4952,7 @@
     if (key === 'setups') return renderStaticTable([{ key: 'setor', label: 'Setor' }, { key: 'variavel', label: 'Variável(eis) de Setup' }, { key: 'min', label: 'Setup min (mins)', center: true }, { key: 'troca', label: 'Setup troca (mins)', center: true }], SETUPS_ROWS, renderConfigRecursosBody);
     if (key === 'leadtimes') return renderLeadTimesComExcecoes();
     if (key === 'acordosLogisticos') return renderAcordosLogisticos();
-    if (key === 'gruposCentros') return renderStaticTable([{ key: 'grupo', label: 'Grupo' }, { key: 'centros', label: 'Centros de Trabalho' }], GRUPOS_CENTROS_TRABALHO, renderConfigRecursosBody);
+    if (key === 'gruposCentros') return renderStaticTable([{ key: 'centro', label: 'Centro de Trabalho' }, { key: 'grupo', label: 'Grupo' }], GRUPOS_CENTROS_TRABALHO, renderConfigRecursosBody);
     if (key === 'prioridades') return renderStaticTable([
       { key: 'grupo', label: 'Grupo' },
       { key: 'maquinas', label: 'Máquinas por Prioridade' },
@@ -5081,6 +5291,9 @@
     } else if (state.section === 'encomendasPlanear') {
       main.innerHTML = '<div class="section-page">' + encomendasPageTemplate() + '</div>';
       bindEncomendasControls();
+    } else if (state.section === 'carteiraEncomendas') {
+      main.innerHTML = '<div class="section-page">' + carteiraPageTemplate() + '</div>';
+      bindCarteiraControls();
     } else if (state.section === 'ofsCriar') {
       main.innerHTML = '<div class="section-page">' + ofsCriarPageTemplate() + '</div>';
       bindOfsCriarControls();
