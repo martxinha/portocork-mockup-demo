@@ -738,6 +738,8 @@
   }
   .table-compact.prod-table { font-size: 11px; }
   .table-compact.prod-table th, .table-compact.prod-table td { padding: 3px 6px; }
+  .table-tight.prod-table { font-size: 10.5px; }
+  .table-tight.prod-table th, .table-tight.prod-table td { padding: 2px 5px; white-space: nowrap; }
   .prod-table thead th {
     background: var(--brand-primary);
     color: #FFFFFF;
@@ -3042,7 +3044,7 @@
         '<td class="prod-cell"><span class="stat-pill ' + (r.estado === 'Expedido' ? 'pill-good' : isAlteracao ? 'pill-bad' : 'pill-warn') + '">' + r.estado + '</span></td>' +
         '<td class="prod-cell"><button class="icon-inline-btn" data-sto-alt-idx="' + STOS_ROWS.indexOf(r) + '" title="Pedido de alteração de data">' + svg('calmonth', 'width="14" height="14"') + '</button></td></tr>';
     }).join('');
-    var table = '<div class="prod-table-wrap"><table class="prod-table table-compact"><thead><tr>' +
+    var table = '<div class="prod-table-wrap"><table class="prod-table table-tight"><thead><tr>' +
       '<th></th><th>Grupo</th><th>Centro Fornecedor</th><th>Material de Produção</th><th>Texto Breve de Material</th>' +
       '<th>Nº Pedido</th><th>Item do Pedido</th><th>Tipo de Ordem de Produção / Planeada</th><th>Status OF</th>' +
       '<th>Data-base do Início</th><th>Data-base do Fim</th>' +
