@@ -1257,6 +1257,7 @@
       ]
     },
     { key: 'sequenciamento', icon: 'sequence', title: 'Sequenciamento' },
+    { key: 'producaoAcompanhamento', icon: 'followup', title: 'Acompanhamento' },
     {
       icon: 'ofs',
       title: 'Gestão de OFs',
@@ -1270,7 +1271,6 @@
       ]
     },
     { key: 'stos', icon: 'truck', title: 'STOs' },
-    { key: 'producaoAcompanhamento', icon: 'followup', title: 'Acompanhamento' },
     { key: 'maquinas', icon: 'factory', title: 'Máquinas' },
     {
       icon: 'gear',
@@ -1891,7 +1891,7 @@
       labeledSelect('Setor', 'prodSetores', setores, prodState.setores) +
       '</div>';
 
-    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Material</th><th>Setor</th><th>Quantidade</th></tr></thead><tbody>' +
+    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Material</th><th>Setor</th><th>Quantidade em Stock</th></tr></thead><tbody>' +
       rows.map(function (r) { return '<tr><td>' + r.material + '</td><td>' + r.setor + '</td><td class="prod-cell">' + r.quantidade + '</td></tr>'; }).join('') +
       '</tbody></table></div>';
 
@@ -1961,7 +1961,6 @@
 
   function producaoPageTemplate() {
     return '' +
-      '<div class="breadcrumb"><span class="crumb-current">Acompanhamento</span></div>' +
       '<div class="content-card">' +
         '<div class="prod-tabs" id="prodTabs">' + PROD_TABS.map(function (t) {
           return '<div class="prod-tab' + (t.key === prodState.tab ? ' active' : '') + '" data-tab="' + t.key + '">' + t.label + '</div>';
