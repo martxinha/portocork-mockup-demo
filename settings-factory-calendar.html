@@ -3056,7 +3056,7 @@
   }
 
   function capPeriodPoints(periodo, groupIdx) {
-    var count = periodo === 'semana' ? 8 : periodo === 'mes' ? 6 : 4;
+    var count = periodo === 'semana' ? 16 : periodo === 'mes' ? 12 : 8;
     var seedBase = periodo === 'semana' ? 1 : periodo === 'mes' ? 2 : 3;
     var points = [];
     for (var i = 0; i < count; i++) points.push(Math.round(pseudo(groupIdx * 13 + i * 5 + seedBase * 31) * 140));
@@ -3071,7 +3071,7 @@
   }
 
   function renderCapSparkline(points, periodo) {
-    var w = 240, h = 74, gap = 2, padB = 16, padT = 14;
+    var w = 34 * points.length, h = 74, gap = 2, padB = 16, padT = 14;
     var chartH = h - padB - padT;
     var barW = (w / points.length) - gap;
     var maxVal = 140;
@@ -3097,7 +3097,7 @@
     var trendPath = centers.map(function (p, i) { return (i === 0 ? 'M' : 'L') + p.cx.toFixed(1) + ',' + p.cy.toFixed(1); }).join(' ');
     var trendLine = '<path d="' + trendPath + '" fill="none" stroke="var(--text-secondary)" stroke-width="1.25" opacity="0.45"/>';
     var trendDots = centers.map(function (p) { return '<circle cx="' + p.cx.toFixed(1) + '" cy="' + p.cy.toFixed(1) + '" r="1.75" fill="var(--text-secondary)" opacity="0.55"/>'; }).join('');
-    return '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:240px;height:74px;display:block;">' + refLine + axisLine + bars + trendLine + trendDots + '</svg>';
+    return '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" style="width:100%;min-width:100%;height:74px;display:block;">' + refLine + axisLine + bars + trendLine + trendDots + '</svg>';
   }
 
   function renderCapPorCentroTable() {
