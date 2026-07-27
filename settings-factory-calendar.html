@@ -3272,21 +3272,21 @@
      prioridade por arrastar (drag-and-drop nativo, só disponível
      quando não há filtros aplicados, para a ordem não ficar ambígua).
      ================================================================== */
-  var SEQ_MACHINES = ['Embalagem01', 'Embalagem03', 'EMB001', 'Robot 2', 'EMB002'];
+  var SEQ_MACHINES = ['Máquina 1 · MFO001', 'Máquina 2 · MFO001', 'Máquina 1 · MLS001', 'Máquina 2 · MLS001', 'Máquina 1 · MTI001', 'Máquina 2 · MTI001'];
   var SEQ_GRUPOS = ['Marcação Fogo', 'Marcação Laser', 'Marcação Tinta', 'Tratamento', 'Embalagem'];
   var SEQ_TIPOS_MARCACAO = ['Todos', 'Fogo', 'Laser', 'Tinta'];
 
   var SEQ_ROWS = [
-    { ovLinha: '1423051208/40', of: '1102060859', material: 'RT NEUT 37X27 E', materialConsumo: 'RT NEUT 37X27', consumoQtd: '24 / 652', grupo: 'Marcação Fogo', maquina: 'Embalagem01', producao: 347.792, objetivo: 1000, data: '2026-07-10', stockOk: true, tipoMarcacao: 'Fogo' },
-    { ovLinha: '1423048407/10', of: '1102061479', material: 'RE FRIZZANTE 42X27 CF', materialConsumo: 'RE FRIZZANTE 4...', consumoQtd: '8 / 36', grupo: 'Marcação Laser', maquina: 'Embalagem01', producao: 108, objetivo: 144, data: '2026-07-13', stockOk: true, tipoMarcacao: 'Laser' },
-    { ovLinha: '1423048408/10', of: '1102061540', material: 'RE FRIZZANTE 42X27 CF', materialConsumo: 'RE FRIZZANTE 4...', consumoQtd: '0 / 144', grupo: 'Marcação Laser', maquina: 'Embalagem01', producao: 0, objetivo: 144, data: '2026-07-13', stockOk: false, tipoMarcacao: 'Laser' },
-    { ovLinha: '1423049577/450', of: '1102060881', material: 'RT QORK 44X24 CF LZ E', materialConsumo: 'RT QORK 44X24 ...', consumoQtd: '3 / 170', grupo: 'Marcação Laser', maquina: 'Robot 2', producao: 85, objetivo: 255, data: '2026-07-17', stockOk: true, tipoMarcacao: 'Laser' },
-    { ovLinha: '1420088157/10', of: '1102061553', material: 'RT NEUT 44X23,5 CF CLE', materialConsumo: 'RT NEUT 44X23,...', consumoQtd: '17 / 50', grupo: 'Marcação Tinta', maquina: 'Robot 2', producao: 630, objetivo: 680, data: '2026-07-17', stockOk: true, tipoMarcacao: 'Tinta' },
-    { ovLinha: '1423051103/20', of: '1102061556', material: 'RT NEUT 38X24 CF CLO E', materialConsumo: 'RT NEUT 38X24 ...', consumoQtd: '1 / 360', grupo: 'Marcação Fogo', maquina: 'EMB001', producao: 120, objetivo: 480, data: '2026-07-17', stockOk: true, tipoMarcacao: 'Fogo' },
-    { ovLinha: '1423050219/140', of: '1101969055', material: 'CORPOS MOLD 30X25 RI', materialConsumo: 'CORPOS MOLD 3...', consumoQtd: '8 / 8', grupo: 'Marcação Fogo', maquina: 'Embalagem03', producao: 291.672, objetivo: 300, data: '2026-07-20', stockOk: true, tipoMarcacao: 'Fogo' },
-    { ovLinha: '4600039575/10', of: '1102069792', material: 'RT NEUT 44X24 CF CLO E', materialConsumo: 'RT NEUT 44X24 CF CLO E', consumoQtd: '44', grupo: 'Marcação Tinta', maquina: 'EMB001', producao: 0, objetivo: 490, data: '2026-07-20', stockOk: false, tipoMarcacao: 'Tinta' },
-    { ovLinha: '1420090097/10', of: '1102010190', material: 'RT NEUT 38X24 CF CLEAR E', materialConsumo: '38', consumoQtd: '0 / 132.48', grupo: 'Marcação Fogo', maquina: 'Robot 2', producao: 0, objetivo: 132.48, data: '2026-07-23', stockOk: true, tipoMarcacao: 'Fogo' },
-    { ovLinha: '4600039575/40', of: '1102070079', material: 'RT NEUT 44X24 CF CLEAR E', materialConsumo: '44', consumoQtd: '0', grupo: 'Marcação Tinta', maquina: 'Robot 2', producao: 0, objetivo: 490, data: '2026-07-21', stockOk: false, tipoMarcacao: 'Tinta' }
+    { ovLinha: '1423051208/40', of: '1102060859', material: 'RT NEUT 37X27 E', materialConsumo: 'RT NEUT 37X27', consumoQtd: '24 / 652', grupo: 'Marcação Fogo', maquina: 'Máquina 1 · MFO001', producao: 347.792, objetivo: 1000, data: '2026-07-10', stockOk: true, tipoMarcacao: 'Fogo' },
+    { ovLinha: '1423048407/10', of: '1102061479', material: 'RE FRIZZANTE 42X27 CF', materialConsumo: 'RE FRIZZANTE 4...', consumoQtd: '8 / 36', grupo: 'Marcação Laser', maquina: 'Máquina 1 · MLS001', producao: 108, objetivo: 144, data: '2026-07-13', stockOk: true, tipoMarcacao: 'Laser' },
+    { ovLinha: '1423048408/10', of: '1102061540', material: 'RE FRIZZANTE 42X27 CF', materialConsumo: 'RE FRIZZANTE 4...', consumoQtd: '0 / 144', grupo: 'Marcação Laser', maquina: 'Máquina 1 · MLS001', producao: 0, objetivo: 144, data: '2026-07-13', stockOk: false, tipoMarcacao: 'Laser' },
+    { ovLinha: '1423049577/450', of: '1102060881', material: 'RT QORK 44X24 CF LZ E', materialConsumo: 'RT QORK 44X24 ...', consumoQtd: '3 / 170', grupo: 'Marcação Laser', maquina: 'Máquina 2 · MLS001', producao: 85, objetivo: 255, data: '2026-07-17', stockOk: true, tipoMarcacao: 'Laser' },
+    { ovLinha: '1420088157/10', of: '1102061553', material: 'RT NEUT 44X23,5 CF CLE', materialConsumo: 'RT NEUT 44X23,...', consumoQtd: '17 / 50', grupo: 'Marcação Tinta', maquina: 'Máquina 1 · MTI001', producao: 630, objetivo: 680, data: '2026-07-17', stockOk: true, tipoMarcacao: 'Tinta' },
+    { ovLinha: '1423051103/20', of: '1102061556', material: 'RT NEUT 38X24 CF CLO E', materialConsumo: 'RT NEUT 38X24 ...', consumoQtd: '1 / 360', grupo: 'Marcação Fogo', maquina: 'Máquina 2 · MFO001', producao: 120, objetivo: 480, data: '2026-07-17', stockOk: true, tipoMarcacao: 'Fogo' },
+    { ovLinha: '1423050219/140', of: '1101969055', material: 'CORPOS MOLD 30X25 RI', materialConsumo: 'CORPOS MOLD 3...', consumoQtd: '8 / 8', grupo: 'Marcação Fogo', maquina: 'Máquina 1 · MFO001', producao: 291.672, objetivo: 300, data: '2026-07-20', stockOk: true, tipoMarcacao: 'Fogo' },
+    { ovLinha: '4600039575/10', of: '1102069792', material: 'RT NEUT 44X24 CF CLO E', materialConsumo: 'RT NEUT 44X24 CF CLO E', consumoQtd: '44', grupo: 'Marcação Tinta', maquina: 'Máquina 1 · MTI001', producao: 0, objetivo: 490, data: '2026-07-20', stockOk: false, tipoMarcacao: 'Tinta' },
+    { ovLinha: '1420090097/10', of: '1102010190', material: 'RT NEUT 38X24 CF CLEAR E', materialConsumo: '38', consumoQtd: '0 / 132.48', grupo: 'Marcação Fogo', maquina: 'Máquina 2 · MFO001', producao: 0, objetivo: 132.48, data: '2026-07-23', stockOk: true, tipoMarcacao: 'Fogo' },
+    { ovLinha: '4600039575/40', of: '1102070079', material: 'RT NEUT 44X24 CF CLEAR E', materialConsumo: '44', consumoQtd: '0', grupo: 'Marcação Tinta', maquina: 'Máquina 2 · MTI001', producao: 0, objetivo: 490, data: '2026-07-21', stockOk: false, tipoMarcacao: 'Tinta' }
   ];
 
   var NDTECH_SEQ_GRUPOS = ['NDTech', 'Lavação', 'Escolha Eletrónica', 'Embalagem'];
