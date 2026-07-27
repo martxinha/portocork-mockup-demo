@@ -3318,7 +3318,8 @@
   function seqProgressPct(row) { return row.objetivo ? Math.round((row.producao / row.objetivo) * 100) : 0; }
 
   function seqStockBadge(row) {
-    return row.stockOk ? '<span class="stat-pill pill-good" style="font-size:9px;">Stock ok</span>' : '<span class="stat-pill pill-bad" style="font-size:9px;">Sem stock</span>';
+    if (row.stockOk) return '<span class="stat-pill pill-good" style="font-size:9px;">Stock ok</span>';
+    return '<span class="stat-pill pill-warn" style="font-size:9px;">' + fmt2(Math.max(0, row.objetivo - row.producao)) + ' un.</span>';
   }
 
   function seqFilteredIndexes() {
@@ -3392,7 +3393,7 @@
           var row = rows[idx];
           var pct = seqProgressPct(row);
           return '<div class="kanban-card">' +
-            '<div class="kanban-card-top">' + row.ovLinha + (row.stockOk ? seqStockBadge(row) : '<span class="stat-pill pill-warn" style="font-size:9px;">' + fmt2(Math.max(0, row.objetivo - row.producao)) + ' un.</span>') + '</div>' +
+            '<div class="kanban-card-top">' + row.ovLinha + seqStockBadge(row) + '</div>' +
             '<div>' + row.of + '</div>' + barcodeSvg(idx * 4.1 + 3) +
             '<div>' + row.material + '</div>' +
             '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%;background:var(--brand-primary)"></div></div>' +
