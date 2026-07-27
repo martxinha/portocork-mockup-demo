@@ -1054,6 +1054,19 @@
   </div>
 </div>
 
+<div class="overlay" id="genericConfirmOverlay">
+  <div class="modal small">
+    <div class="modal-title" id="genericConfirmTitle">Confirmar</div>
+    <div class="modal-body">
+      <div class="confirm-text" id="genericConfirmText"></div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="btnGenericConfirmCancel">Cancelar</button>
+      <button type="button" class="btn danger" id="btnGenericConfirmOk">Eliminar</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="stoAltDataOverlay">
   <div class="modal small">
     <div class="modal-title">Pedido de alteração de data</div>
@@ -4659,13 +4672,63 @@
   ];
 
   var GESTAO_UTILIZADORES_ROWS = [
-    { nome: 'M. Azevedo', email: 'mazevedo@kaizen.com', perfil: 'Admin' },
-    { nome: 'J. Silva', email: 'jsilva@portocork.com', perfil: 'Distribuição' },
-    { nome: 'M. Costa', email: 'mcosta@portocork.com', perfil: 'NDTech' },
-    { nome: 'Chão de Fábrica', email: 'chaodefabrica@portocork.com', perfil: 'Distribuição' },
-    { nome: 'VL', email: 'sto@vl.pt', perfil: 'Fornecedor' }
+    { nome: 'M. Azevedo', email: 'mazevedo@kaizen.com', perfil: 'Admin', ativo: true },
+    { nome: 'J. Silva', email: 'jsilva@portocork.com', perfil: 'Distribuição', ativo: true },
+    { nome: 'M. Costa', email: 'mcosta@portocork.com', perfil: 'NDTech', ativo: false },
+    { nome: 'Chão de Fábrica', email: 'chaodefabrica@portocork.com', perfil: 'Distribuição', ativo: true },
+    { nome: 'VL', email: 'sto@vl.pt', perfil: 'Fornecedor', ativo: true }
   ];
   var PERFIS_UTILIZADOR = ['Admin', 'Fornecedor', 'NDTech', 'Distribuição'];
+  var GESTAO_UTILIZADORES_FIELDS = [
+    { key: 'nome', label: 'Nome', type: 'text' },
+    { key: 'email', label: 'Email', type: 'text' },
+    { key: 'perfil', label: 'Perfil', type: 'select', options: PERFIS_UTILIZADOR }
+  ];
+  var utilizadoresState = { busca: '', perfilFiltro: [] };
+
+  function iniciaisUtilizador(nome) {
+    var parts = (nome || '').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '?';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  function renderGestaoUtilizadoresTab() {
+    var rows = GESTAO_UTILIZADORES_ROWS.filter(function (r) {
+      if (utilizadoresState.perfilFiltro.length && utilizadoresState.perfilFiltro.indexOf(r.perfil) === -1) return false;
+      if (utilizadoresState.busca) {
+        var q = utilizadoresState.busca.toLowerCase();
+        if (r.nome.toLowerCase().indexOf(q) === -1 && r.email.toLowerCase().indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+    var perfilChips = PERFIS_UTILIZADOR.map(function (p) {
+      return '<div class="chip-filter' + (utilizadoresState.perfilFiltro.indexOf(p) !== -1 ? ' active' : '') + '" data-utilizadorperfilfiltro="' + p + '">' + p + '</div>';
+    }).join('');
+    var toolbar = '<div class="prod-toolbar">' +
+      '<div class="filter-label" style="align-self:center;">PERFIS</div><div class="chip-group">' + perfilChips + '</div>' +
+      '<div class="toolbar-spacer"></div>' +
+      labeledInput('Pesquisar', 'utilizadoresBusca', 'Nome ou email', utilizadoresState.busca) +
+      '<button class="btn btn-primary" id="utilizadoresAdicionar" style="align-self:flex-end;">+ Adicionar Utilizador</button>' +
+      '</div>';
+    var tableRows = rows.map(function (r) {
+      var trueIdx = GESTAO_UTILIZADORES_ROWS.indexOf(r);
+      return '<tr>' +
+        '<td><div style="display:flex;align-items:center;gap:8px;">' +
+          '<span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--sidebar-active-bg);color:var(--brand-primary-dark);font-size:10.5px;font-weight:700;flex:none;">' + iniciaisUtilizador(r.nome) + '</span>' +
+          (r.nome || '<span style="color:var(--text-muted)">—</span>') +
+        '</div></td>' +
+        '<td>' + (r.email || '<span style="color:var(--text-muted)">—</span>') + '</td>' +
+        '<td class="prod-cell"><span class="stat-pill ' + (r.perfil === 'Admin' ? 'pill-bad' : r.perfil === 'Fornecedor' ? 'pill-warn' : 'pill-neutral') + '">' + r.perfil + '</span></td>' +
+        '<td class="prod-cell"><div class="switch' + (r.ativo ? ' on' : '') + '" data-utilizador-toggle-idx="' + trueIdx + '" title="' + (r.ativo ? 'Ativo — clicar para desativar' : 'Inativo — clicar para ativar') + '"><div class="thumb"></div></div></td>' +
+        '<td class="prod-cell"><button class="icon-inline-btn" data-utilizador-edit-idx="' + trueIdx + '" title="Editar">' + svg('pencil', 'width="14" height="14"') + '</button><button class="icon-inline-btn" data-utilizador-delete-idx="' + trueIdx + '" title="Eliminar">🗑</button></td>' +
+      '</tr>';
+    }).join('');
+    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Nome</th><th>Email</th><th>Perfil</th><th>Estado</th><th>Ações</th></tr></thead><tbody>' +
+      (tableRows || '<tr><td colspan="5"><div class="empty-state">Sem utilizadores para este filtro.</div></td></tr>') +
+      '</tbody></table></div>';
+    return toolbar + table;
+  }
 
   var GESTAO_CLASSES_ROWS = [
     { classe: 'Extra', filhas: 'Extra/Natural, Extra/Clássica', prioridade: 1 },
@@ -4758,14 +4821,7 @@
       ], CALENDARIO_EXPEDICAO_ROWS, renderConfigGeraisBody);
     }
     if (key === 'gestaoAlertas') return renderStaticTable([{ key: 'tipo', label: 'Tipo' }, { key: 'categoria', label: 'Categoria' }, { key: 'descricao', label: 'Descrição' }, { key: 'snooze', label: 'Snooze (dias)', center: true }, { key: 'intervalo', label: 'Intervalo (dias)', center: true }, { key: 'status', label: 'Status', center: true, render: function (r) { return '<span class="stat-pill ' + (r.status === 'Ativo' ? 'pill-good' : 'pill-neutral') + '">' + r.status + '</span>'; } }], GESTAO_ALERTAS_ROWS, renderConfigGeraisBody);
-    if (key === 'gestaoUtilizadores') return renderStaticTable([
-      { key: 'nome', label: 'Nome' }, { key: 'email', label: 'Email' },
-      { key: 'perfil', label: 'Perfil', center: true, render: function (r) { return '<span class="stat-pill ' + (r.perfil === 'Admin' ? 'pill-bad' : r.perfil === 'Fornecedor' ? 'pill-warn' : 'pill-neutral') + '">' + r.perfil + '</span>'; } }
-    ], GESTAO_UTILIZADORES_ROWS, renderConfigGeraisBody, [
-      { key: 'nome', label: 'Nome', type: 'text' },
-      { key: 'email', label: 'Email', type: 'text' },
-      { key: 'perfil', label: 'Perfil', type: 'select', options: PERFIS_UTILIZADOR }
-    ]);
+    if (key === 'gestaoUtilizadores') return renderGestaoUtilizadoresTab();
     if (key === 'gestaoClasses') return renderStaticTable([{ key: 'classe', label: 'Classe' }, { key: 'filhas', label: 'Classes Filhas' }, { key: 'prioridade', label: 'Prioridade', center: true }], GESTAO_CLASSES_ROWS, renderConfigGeraisBody);
     return renderClientesTab();
   }
@@ -4813,6 +4869,47 @@
       });
       body.querySelectorAll('.icon-inline-btn[title="Eliminar"]').forEach(function (btn) {
         btn.addEventListener('click', function () { showToast('Cliente eliminado (protótipo)'); });
+      });
+    } else if (configGeraisState.tab === 'gestaoUtilizadores') {
+      body.querySelectorAll('[data-utilizadorperfilfiltro]').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          toggleChip(utilizadoresState.perfilFiltro, chip.getAttribute('data-utilizadorperfilfiltro'));
+          renderConfigGeraisBody();
+        });
+      });
+      var utilBusca = body.querySelector('#utilizadoresBusca');
+      if (utilBusca) utilBusca.addEventListener('input', function (e) { utilizadoresState.busca = e.target.value; renderConfigGeraisBody(); });
+      body.querySelectorAll('[data-utilizador-edit-idx]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var idx = parseInt(btn.getAttribute('data-utilizador-edit-idx'), 10);
+          openMaquinaEditModal(GESTAO_UTILIZADORES_ROWS, idx, GESTAO_UTILIZADORES_FIELDS, renderConfigGeraisBody);
+        });
+      });
+      body.querySelectorAll('[data-utilizador-delete-idx]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var idx = parseInt(btn.getAttribute('data-utilizador-delete-idx'), 10);
+          var row = GESTAO_UTILIZADORES_ROWS[idx];
+          openGenericConfirm('Eliminar utilizador', 'Tem a certeza que pretende eliminar o utilizador "' + (row.nome || '(sem nome)') + '"? Esta ação não pode ser revertida.', function () {
+            GESTAO_UTILIZADORES_ROWS.splice(idx, 1);
+            renderConfigGeraisBody();
+            showToast('Utilizador eliminado');
+          });
+        });
+      });
+      body.querySelectorAll('[data-utilizador-toggle-idx]').forEach(function (sw) {
+        sw.addEventListener('click', function () {
+          var idx = parseInt(sw.getAttribute('data-utilizador-toggle-idx'), 10);
+          GESTAO_UTILIZADORES_ROWS[idx].ativo = !GESTAO_UTILIZADORES_ROWS[idx].ativo;
+          renderConfigGeraisBody();
+          showToast('Estado atualizado');
+        });
+      });
+      var utilAddBtn = body.querySelector('#utilizadoresAdicionar');
+      if (utilAddBtn) utilAddBtn.addEventListener('click', function () {
+        GESTAO_UTILIZADORES_ROWS.push({ nome: '', email: '', perfil: PERFIS_UTILIZADOR[3], ativo: true });
+        var newIdx = GESTAO_UTILIZADORES_ROWS.length - 1;
+        renderConfigGeraisBody();
+        openMaquinaEditModal(GESTAO_UTILIZADORES_ROWS, newIdx, GESTAO_UTILIZADORES_FIELDS, renderConfigGeraisBody);
       });
     }
   }
@@ -5037,6 +5134,23 @@
     closeMaquinaEditModal();
     showToast('Alterações guardadas (protótipo)');
     if (rerender) rerender();
+  });
+
+  var genericConfirmOverlay = document.getElementById('genericConfirmOverlay');
+  var genericConfirmCallback = null;
+  function openGenericConfirm(title, text, onConfirm) {
+    document.getElementById('genericConfirmTitle').textContent = title;
+    document.getElementById('genericConfirmText').textContent = text;
+    genericConfirmCallback = onConfirm;
+    genericConfirmOverlay.classList.add('open');
+  }
+  function closeGenericConfirm() { genericConfirmOverlay.classList.remove('open'); genericConfirmCallback = null; }
+  genericConfirmOverlay.addEventListener('click', function (e) { if (e.target === genericConfirmOverlay) closeGenericConfirm(); });
+  document.getElementById('btnGenericConfirmCancel').addEventListener('click', closeGenericConfirm);
+  document.getElementById('btnGenericConfirmOk').addEventListener('click', function () {
+    var cb = genericConfirmCallback;
+    closeGenericConfirm();
+    if (cb) cb();
   });
 
   function maquinaFieldHtml(field, row) {
