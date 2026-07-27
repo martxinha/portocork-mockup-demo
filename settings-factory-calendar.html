@@ -3071,26 +3071,33 @@
   }
 
   function renderCapSparkline(points, periodo) {
-    var w = 220, h = 64, gap = 3, padB = 16, padT = 4;
+    var w = 240, h = 74, gap = 2, padB = 16, padT = 14;
     var chartH = h - padB - padT;
     var barW = (w / points.length) - gap;
     var maxVal = 140;
     var labels = capPeriodLabels(periodo, points.length);
     var refY = padT + (1 - 100 / maxVal) * chartH;
     var axisLine = '<line x1="0" y1="' + (padT + chartH).toFixed(1) + '" x2="' + w + '" y2="' + (padT + chartH).toFixed(1) + '" stroke="var(--border-primary)" stroke-width="1"/>';
-    var refLine = '<line x1="0" y1="' + refY.toFixed(1) + '" x2="' + w + '" y2="' + refY.toFixed(1) + '" stroke="var(--evt-stop)" stroke-width="1" stroke-dasharray="3,3" opacity="0.55"/>';
+    var refLine = '<line x1="0" y1="' + refY.toFixed(1) + '" x2="' + w + '" y2="' + refY.toFixed(1) + '" stroke="var(--evt-stop)" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>';
+    var centers = [];
     var bars = points.map(function (pct, i) {
       var bh = Math.max(2, (pct / maxVal) * chartH);
       var x = i * (barW + gap);
       var y = padT + chartH - bh;
       var color = pct > 100 ? 'var(--evt-stop)' : pct >= 80 ? '#0A66CC' : 'var(--brand-primary)';
       var label = labels[i];
+      var isLast = i === points.length - 1;
+      centers.push({ cx: x + barW / 2, cy: y, color: color });
       return '<g>' +
-        '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="1.5" fill="' + color + '"><title>' + label + ': ' + pct + '%</title></rect>' +
+        '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="2" fill="' + color + '"><title>' + label + ': ' + pct + '%</title></rect>' +
+        (isLast ? '<text x="' + (x + barW / 2).toFixed(1) + '" y="' + (y - 4).toFixed(1) + '" font-size="9" font-weight="700" fill="var(--text-primary)" text-anchor="middle">' + pct + '%</text>' : '') +
         '<text x="' + (x + barW / 2).toFixed(1) + '" y="' + (h - 3) + '" font-size="8" fill="var(--text-muted)" text-anchor="middle">' + label + '</text>' +
         '</g>';
     }).join('');
-    return '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:220px;height:64px;display:block;">' + refLine + axisLine + bars + '</svg>';
+    var trendPath = centers.map(function (p, i) { return (i === 0 ? 'M' : 'L') + p.cx.toFixed(1) + ',' + p.cy.toFixed(1); }).join(' ');
+    var trendLine = '<path d="' + trendPath + '" fill="none" stroke="var(--text-secondary)" stroke-width="1.25" opacity="0.45"/>';
+    var trendDots = centers.map(function (p) { return '<circle cx="' + p.cx.toFixed(1) + '" cy="' + p.cy.toFixed(1) + '" r="1.75" fill="var(--text-secondary)" opacity="0.55"/>'; }).join('');
+    return '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:240px;height:74px;display:block;">' + refLine + axisLine + bars + trendLine + trendDots + '</svg>';
   }
 
   function renderCapPorCentroTable() {
@@ -3165,7 +3172,7 @@
       '<div class="chip-filter' + (capState.view === 'porCentro' ? ' active' : '') + '" data-view="porCentro">Por Centro de Trabalho</div>' +
       '<div class="chip-filter' + (capState.view === 'grafico' ? ' active' : '') + '" data-view="grafico">Gráfico Geral</div>' +
       '</div>';
-    var toolbar = '<div class="prod-toolbar"><div class="toolbar-spacer"></div>' + viewToggle + '</div>';
+    var toolbar = '<div class="prod-toolbar"><div class="filter-label" style="align-self:center;">Visão Global</div><div class="toolbar-spacer"></div>' + viewToggle + '</div>';
     var body = capState.view === 'tabela' ? renderCapTable() : capState.view === 'porCentro' ? renderCapPorCentroTable() : renderCapChart();
     card.innerHTML = toolbar + body;
     card.querySelectorAll('[data-view]').forEach(function (btn) {
