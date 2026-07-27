@@ -496,6 +496,12 @@
     color: #FFFFFF;
   }
   .btn-primary:hover { background: var(--brand-primary-dark); }
+  .btn-success {
+    background: var(--evt-closure);
+    border-color: var(--evt-closure);
+    color: #FFFFFF;
+  }
+  .btn-success:hover { filter: brightness(0.92); }
 
   .action-dropdown { position: relative; display: inline-block; }
   .action-dropdown-menu {
@@ -2148,7 +2154,35 @@
      Encomendas por Planear
      ================================================================== */
   var ENCOMENDA_ESTADOS = ['Todos', 'Cumpre', 'Standby', 'Não Cumpre'];
-  var encState = { estado: 'Todos' };
+  var encState = { estado: 'Todos', calibreFiltro: [] };
+
+  function encomendaCalibre(material) {
+    var m = String(material || '').match(/\d{2,3}(?:[.,]\d+)?X\d{2,3}(?:[.,]\d+)?/i);
+    return m ? m[0].toUpperCase() : 'OUTROS';
+  }
+
+  var ENC_COLUMNS = [
+    { key: 'ov', label: 'OV/Item', render: function (r) { return r.ov; } },
+    { key: 'pais', label: 'País Destino', center: true, render: function (r) { return r.pais; } },
+    { key: 'soldTo', label: 'Sold To', render: function (r) { return r.soldTo; } },
+    { key: 'shipTo', label: 'Ship To', render: function (r) { return r.shipTo; } },
+    { key: 'z001', label: 'Textos Z001 - Produção', render: function (r) { return r.z001 || '<span style="color:var(--text-muted)">—</span>'; } },
+    { key: 'z002', label: 'Textos Z002 - Qualidade', render: function (r) { return r.z002 || '<span style="color:var(--text-muted)">—</span>'; } },
+    { key: 'nivel', label: 'Nível Hierárquico', render: function (r) { return r.nivel; } },
+    { key: 'tratamento', label: 'Tipo de Tratamento', center: true, render: function (r) { return r.tratamento; } },
+    { key: 'corpo', label: 'Corpo', center: true, render: function (r) { return r.corpo || '—'; } },
+    { key: 'topos', label: 'Topos', center: true, render: function (r) { return r.topos || '—'; } },
+    { key: 'material', label: 'Texto Breve Material', render: function (r) { return r.material; } },
+    { key: 'qtd', label: 'Quantidade', center: true, render: function (r) { return fmt2(r.qtd); } },
+    { key: 'criacaoOv', label: 'Data Criação OV', render: function (r) { return r.criacaoOv; } },
+    { key: 'desejada', label: 'Data Desejada Saída Mercadoria', render: function (r) { return r.desejada; } },
+    { key: 'prevista', label: 'Data Prevista Expedição', render: function (r) { return r.prevista || '<span style="color:var(--evt-stop)">! sem data</span>'; } },
+    { key: 'estado', label: 'Data do Cliente (Status)', center: true, render: function (r) { return '<span class="stat-pill ' + encomendaEstadoTone(r.estado) + '">' + r.estado + '</span>'; } },
+    { key: 'alertas', label: 'Alertas', center: true, render: function (r) { return encomendaAlertasHtml(r); } }
+  ];
+  var encColVisible = {};
+  ENC_COLUMNS.forEach(function (c) { encColVisible[c.key] = true; });
+  var encColMenuOpen = false;
 
   var ENCOMENDAS_ROWS = [
     { ov: '1420092537/10', sto: { alert: true, pct: 106 }, pais: 'PT', soldTo: 'CASA VINHOS DA QUINTA, LDA.', shipTo: 'CASA VINHOS DA QUINTA, LDA.', z001: 'Atenção ao transportador...', z002: '', nivel: 'XPUR', tratamento: 'TR08.00', corpo: '', topos: 'Tinta', material: 'RT XPUR 44X24 CF CLEAR M T E', qtd: 100, criacaoOv: '2026-07-22', desejada: '2026-08-14', prevista: '2026-08-14', estado: 'Cumpre', alertas: ['reprocessamento'] },
@@ -2266,56 +2300,71 @@
 
   function renderEncomendasBody() {
     var card = document.getElementById('encCard');
-    var rows = ENCOMENDAS_ROWS.filter(function (r) { return encState.estado === 'Todos' || r.estado === encState.estado; });
+    var rows = ENCOMENDAS_ROWS.filter(function (r) {
+      if (encState.estado !== 'Todos' && r.estado !== encState.estado) return false;
+      if (encState.calibreFiltro.length && encState.calibreFiltro.indexOf(encomendaCalibre(r.material)) === -1) return false;
+      return true;
+    });
     var qtdTotal = rows.reduce(function (a, r) { return a + r.qtd; }, 0);
     var nSelected = Object.keys(encSelected).filter(function (k) { return encSelected[k]; }).length;
+    var calibresDisponiveis = Array.from(new Set(ENCOMENDAS_ROWS.map(function (r) { return encomendaCalibre(r.material); }))).sort();
+    var visibleCols = ENC_COLUMNS.filter(function (c) { return encColVisible[c.key]; });
 
     var toolbar = '<div class="prod-toolbar">' +
       selectHtml('encEstadoSelect', ENCOMENDA_ESTADOS, encState.estado) +
       '<div class="stat-inline">Quantidade Total<strong>' + fmt2(qtdTotal) + '</strong></div>' +
+      '<button class="btn" id="encLimparFiltros">' + svg('warn', 'width="13" height="13"') + ' Limpar Filtros</button>' +
       '<div class="toolbar-spacer"></div>' +
-      '<button class="btn" id="encImportar">' + svg('upload', 'width="14" height="14"') + ' IMPORTAR</button>' +
-      '<div class="action-dropdown"><button class="btn btn-primary" id="encPlaneamento">' + svg('gear', 'width="14" height="14"') + ' PLANEAMENTO ▾</button>' +
-      '<div class="action-dropdown-menu" id="encPlaneamentoMenu">' +
-      '<div class="action-dropdown-item" data-plan-action="Planear">' + svg('gear', '') + 'Planear</div>' +
-      '<div class="action-dropdown-item" data-plan-action="Validar Plano">' + svg('calmonth', '') + 'Validar Plano</div>' +
-      '<div class="action-dropdown-item" data-plan-action="Gerar OFs">' + svg('download', '') + 'Gerar OFs</div>' +
+      '<div class="action-dropdown"><button class="btn" id="encColunas">' + svg('grid', 'width="14" height="14"') + ' Colunas Visíveis (' + visibleCols.length + '/' + ENC_COLUMNS.length + ')</button>' +
+      '<div class="action-dropdown-menu' + (encColMenuOpen ? ' open' : '') + '" id="encColunasMenu" style="max-height:280px;overflow-y:auto;min-width:240px;">' +
+      ENC_COLUMNS.map(function (c) {
+        return '<label class="action-dropdown-item" style="cursor:pointer;"><input type="checkbox" data-enc-col-toggle="' + c.key + '"' + (encColVisible[c.key] ? ' checked' : '') + ' style="margin-right:6px;"> ' + c.label + '</label>';
+      }).join('') +
       '</div></div>' +
-      '<div class="action-dropdown"><button class="btn btn-primary" id="encExportacoes">' + svg('download', 'width="14" height="14"') + ' EXPORTAÇÕES ▾</button>' +
-      '<div class="action-dropdown-menu" id="encExportacoesMenu">' +
-      '<div class="action-dropdown-item" data-export-action="Gerar STOs">' + svg('orders', '') + 'Gerar STOs</div>' +
-      '</div></div>' +
+      '<button class="btn" id="encImportar">' + svg('upload', 'width="14" height="14"') + ' Importar</button>' +
+      '<button class="btn btn-primary" id="encPlanear">' + svg('gear', 'width="14" height="14"') + ' Planear</button>' +
+      '<button class="btn btn-success" id="encExportarOfs">' + svg('download', 'width="14" height="14"') + ' Exportar OFs</button>' +
+      '</div>' +
+      '<div class="prod-toolbar">' +
+      '<div class="filter-label" style="align-self:center;">FILTRAR POR</div><div class="chip-group">' +
+      calibresDisponiveis.map(function (c) {
+        return '<div class="chip-filter' + (encState.calibreFiltro.indexOf(c) !== -1 ? ' active' : '') + '" data-enc-calibre="' + c + '">' + c + '</div>';
+      }).join('') +
+      '</div>' +
       '</div>';
 
     var rowsHtml = rows.map(function (r) {
       var trueIdx = ENCOMENDAS_ROWS.indexOf(r);
       return '<tr' + (r.sto.alert ? ' style="background:var(--evt-holiday-bg);"' : '') + '>' +
+        '<td class="prod-cell"><button class="icon-inline-btn" title="Sincronizar">' + svg('refresh', 'width="13" height="13"') + '</button><button class="icon-inline-btn" title="Configurar">' + svg('gear', 'width="13" height="13"') + '</button><button class="icon-inline-btn" data-balanco-idx="' + trueIdx + '" title="Balanço de Stock">' + svg('orders', 'width="13" height="13"') + '</button></td>' +
         '<td class="prod-cell"><input type="checkbox" data-enc-select="' + r.ov + '"' + (encSelected[r.ov] ? ' checked' : '') + '></td>' +
         '<td class="prod-cell"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--text-muted);"></span></td>' +
         '<td class="prod-cell">' + encomendaStoBadge(r.sto) + '</td>' +
-        '<td class="prod-cell"><button class="icon-inline-btn" title="Sincronizar">' + svg('refresh', 'width="13" height="13"') + '</button><button class="icon-inline-btn" title="Configurar">' + svg('gear', 'width="13" height="13"') + '</button><button class="icon-inline-btn" data-balanco-idx="' + trueIdx + '" title="Balanço de Stock">' + svg('orders', 'width="13" height="13"') + '</button></td>' +
-        '<td>' + r.ov + '</td><td class="prod-cell">' + r.pais + '</td><td>' + r.soldTo + '</td><td>' + r.shipTo + '</td>' +
-        '<td>' + (r.z001 || '<span style="color:var(--text-muted)">—</span>') + '</td><td>' + (r.z002 || '<span style="color:var(--text-muted)">—</span>') + '</td>' +
-        '<td>' + r.nivel + '</td><td class="prod-cell">' + r.tratamento + '</td>' +
-        '<td class="prod-cell">' + (r.corpo || '—') + '</td><td class="prod-cell">' + (r.topos || '—') + '</td>' +
-        '<td>' + r.material + '</td><td class="prod-cell">' + fmt2(r.qtd) + '</td>' +
-        '<td>' + r.criacaoOv + '</td><td>' + r.desejada + '</td><td>' + (r.prevista || '<span style="color:var(--evt-stop)">! sem data</span>') + '</td>' +
-        '<td class="prod-cell"><span class="stat-pill ' + encomendaEstadoTone(r.estado) + '">' + r.estado + '</span></td>' +
-        '<td class="prod-cell">' + encomendaAlertasHtml(r) + '</td>' +
+        visibleCols.map(function (c) { return '<td' + (c.center ? ' class="prod-cell"' : '') + '>' + c.render(r) + '</td>'; }).join('') +
         '</tr>';
     }).join('');
 
     var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr>' +
-      '<th></th><th>Stock Disp.</th><th>STO</th><th></th><th>OV/Item</th><th>País Destino</th><th>Sold To</th><th>Ship To</th>' +
-      '<th>Textos Z001 - Produção</th><th>Textos Z002 - Qualidade</th><th>Nível Hierárquico</th><th>Tipo de Tratamento</th>' +
-      '<th>Corpo</th><th>Topos</th><th>Texto Breve Material</th><th>Quantidade</th>' +
-      '<th>Data Criação OV</th><th>Data Desejada Saída Mercadoria</th><th>Data Prevista Expedição</th><th>Data do Cliente (Status)</th><th>Alertas</th>' +
+      '<th></th><th></th><th>Stock Disp.</th><th>STO</th>' +
+      visibleCols.map(function (c) { return '<th>' + c.label + '</th>'; }).join('') +
       '</tr></thead><tbody>' + rowsHtml + '</tbody></table></div>';
     var footer = '<div class="table-footer">Linhas por página <select class="filter-select" style="min-width:60px" disabled><option>50</option></select><span class="toolbar-spacer"></span>1-' + rows.length + ' of ' + rows.length + '</div>';
 
     card.innerHTML = toolbar + table + footer;
 
     document.getElementById('encEstadoSelect').addEventListener('change', function (e) { encState.estado = e.target.value; renderEncomendasBody(); });
+    document.getElementById('encLimparFiltros').addEventListener('click', function () {
+      encState.estado = 'Todos';
+      encState.calibreFiltro = [];
+      renderEncomendasBody();
+      showToast('Filtros limpos');
+    });
+    card.querySelectorAll('[data-enc-calibre]').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        toggleChip(encState.calibreFiltro, chip.getAttribute('data-enc-calibre'));
+        renderEncomendasBody();
+      });
+    });
     document.getElementById('encImportar').addEventListener('click', function () { showToast('Importação (protótipo)'); });
     card.querySelectorAll('[data-enc-select]').forEach(function (cb) {
       cb.addEventListener('change', function () { encSelected[cb.getAttribute('data-enc-select')] = cb.checked; });
@@ -2323,19 +2372,34 @@
     card.querySelectorAll('[data-balanco-idx]').forEach(function (btn) {
       btn.addEventListener('click', function () { openBalancoStockModal(parseInt(btn.getAttribute('data-balanco-idx'), 10)); });
     });
-    function closeActionMenus() { card.querySelectorAll('.action-dropdown-menu.open').forEach(function (m) { m.classList.remove('open'); }); }
-    document.getElementById('encPlaneamento').addEventListener('click', function (e) { e.stopPropagation(); var btn = e.currentTarget, menu = document.getElementById('encPlaneamentoMenu'); var open = menu.classList.contains('open'); closeActionMenus(); if (!open) { positionFixedDropdown(menu, btn); menu.classList.add('open'); } });
-    document.getElementById('encExportacoes').addEventListener('click', function (e) { e.stopPropagation(); var btn = e.currentTarget, menu = document.getElementById('encExportacoesMenu'); var open = menu.classList.contains('open'); closeActionMenus(); if (!open) { positionFixedDropdown(menu, btn); menu.classList.add('open'); } });
-    card.querySelectorAll('[data-plan-action]').forEach(function (item) {
-      item.addEventListener('click', function () {
-        closeActionMenus();
-        var n = Object.keys(encSelected).filter(function (k) { return encSelected[k]; }).length;
-        if (n === 0) { showToast('Selecione pelo menos uma encomenda'); return; }
-        showToast(item.getAttribute('data-plan-action') + ': ' + n + ' encomenda(s) (protótipo)');
+    function closeActionMenus() { card.querySelectorAll('.action-dropdown-menu.open').forEach(function (m) { m.classList.remove('open'); }); encColMenuOpen = false; }
+    document.getElementById('encColunas').addEventListener('click', function (e) {
+      e.stopPropagation();
+      var btn = e.currentTarget, menu = document.getElementById('encColunasMenu');
+      var open = menu.classList.contains('open');
+      closeActionMenus();
+      if (!open) { encColMenuOpen = true; positionFixedDropdown(menu, btn); menu.classList.add('open'); }
+    });
+    card.querySelectorAll('[data-enc-col-toggle]').forEach(function (cb) {
+      cb.addEventListener('click', function (e) { e.stopPropagation(); });
+      cb.addEventListener('change', function () {
+        encColVisible[cb.getAttribute('data-enc-col-toggle')] = cb.checked;
+        renderEncomendasBody();
+        requestAnimationFrame(function () {
+          var menu = document.getElementById('encColunasMenu'), btn = document.getElementById('encColunas');
+          if (menu && btn) positionFixedDropdown(menu, btn);
+        });
       });
     });
-    card.querySelectorAll('[data-export-action]').forEach(function (item) {
-      item.addEventListener('click', function () { closeActionMenus(); showToast(item.getAttribute('data-export-action') + ' (protótipo)'); });
+    document.getElementById('encPlanear').addEventListener('click', function () {
+      var n = Object.keys(encSelected).filter(function (k) { return encSelected[k]; }).length;
+      if (n === 0) { showToast('Selecione pelo menos uma encomenda'); return; }
+      showToast('Planear: ' + n + ' encomenda(s) (protótipo)');
+    });
+    document.getElementById('encExportarOfs').addEventListener('click', function () {
+      var n = Object.keys(encSelected).filter(function (k) { return encSelected[k]; }).length;
+      if (n === 0) { showToast('Selecione pelo menos uma encomenda'); return; }
+      showToast('Exportar OFs: ' + n + ' encomenda(s) (protótipo)');
     });
     if (encDocClickHandler) document.removeEventListener('click', encDocClickHandler);
     encDocClickHandler = closeActionMenus;
