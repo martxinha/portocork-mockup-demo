@@ -3357,10 +3357,10 @@
       '<td>' + row.ovLinha + '<div>' + barcodeSvg(idx * 4.1 + 3) + '</div></td>' +
       '<td>' + row.of + '</td>' +
       '<td>' + row.material + '</td>' +
-      '<td>' + row.materialConsumo + '<div><span class="stat-pill pill-neutral" style="font-size:9px;">' + row.consumoQtd + '</span></div></td>' +
+      '<td>' + row.materialConsumo + '<div><span class="stat-pill pill-neutral" style="font-size:9px;">' + row.consumoQtd + ' ML</span></div></td>' +
       '<td>' + row.grupo + '</td>' +
       '<td>' + row.maquina + '</td>' +
-      '<td><div class="progress-track" style="width:90px;margin-bottom:3px;"><div class="progress-fill" style="width:' + pct + '%;background:' + barColor + '"></div></div>' + fmt2(row.producao) + ' / ' + row.objetivo + ' · ' + pct + '%</td>' +
+      '<td><div class="progress-track" style="width:90px;margin-bottom:3px;"><div class="progress-fill" style="width:' + pct + '%;background:' + barColor + '"></div></div>' + fmt2(row.producao) + ' / ' + row.objetivo + ' ML · ' + pct + '%</td>' +
       '<td>' + row.data + '</td>' +
       '<td class="prod-cell">' + seqStockBadge(row) + '</td>' +
       '<td class="prod-cell"><button class="btn hist-btn seq-detail-btn" data-idx="' + idx + '">Ver Detalhes</button></td>' +
@@ -3396,7 +3396,7 @@
             '<div>' + row.of + '</div>' + barcodeSvg(idx * 4.1 + 3) +
             '<div>' + row.material + '</div>' +
             '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%;background:var(--brand-primary)"></div></div>' +
-            '<div style="font-size:10.5px;">' + fmt2(row.producao) + ' / ' + row.objetivo + ' · ' + pct + '%</div>' +
+            '<div style="font-size:10.5px;">' + fmt2(row.producao) + ' / ' + row.objetivo + ' ML · ' + pct + '%</div>' +
             '<button class="btn hist-btn seq-detail-btn" data-idx="' + idx + '" style="margin-top:6px;">Ver Detalhes</button>' +
             '</div>';
         }).join('') +
