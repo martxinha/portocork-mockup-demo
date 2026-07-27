@@ -1910,16 +1910,16 @@
 
   function renderConsumosTab() {
     var days = prodWeekDays();
+    var etapasUnicas = ['Todos'].concat(PLANO_ROWS.map(planoProcessoEtapa).filter(function (v, i, a) { return a.indexOf(v) === i; }));
+    var centrosUnicos = ['Todos'].concat(PLANO_ROWS.map(planoProcessoCentro).filter(function (v, i, a) { return a.indexOf(v) === i; }));
     var rows = PLANO_ROWS.filter(function (r) {
-      return (prodState.calibre === 'Todos' || r.calibre === prodState.calibre) &&
-        (prodState.classe === 'Todas' || r.classe === prodState.classe) &&
-        (prodState.lavacao === 'Todas' || r.lavacao === prodState.lavacao);
+      return (prodState.processoEtapa === 'Todos' || planoProcessoEtapa(r) === prodState.processoEtapa) &&
+        (prodState.processoCentro === 'Todos' || planoProcessoCentro(r) === prodState.processoCentro);
     });
 
     var toolbar = '<div class="prod-toolbar">' + weekNavHtml() +
-      labeledSelect('Calibre', 'prodCalibre', ['Todos', '24x38', '24x45', '24x49'], prodState.calibre) +
-      labeledSelect('Classe', 'prodClasse', ['Todas', 'Extra', 'Primeira', 'Segunda'], prodState.classe) +
-      labeledSelect('Lavação', 'prodLavacao', ['Todas', 'Natural', 'Clássica', 'Rosé'], prodState.lavacao) +
+      labeledSelect('Processo', 'prodProcessoEtapa', etapasUnicas, prodState.processoEtapa) +
+      labeledSelect('Centro de Trabalho', 'prodProcessoCentro', centrosUnicos, prodState.processoCentro) +
       '<div class="toolbar-spacer"></div>' +
       '<div class="progress-indicator">Progresso da Semana<strong>' + progressAvg(rows) + '%</strong></div>' +
       '</div>';
@@ -1948,14 +1948,26 @@
   }
 
   function renderOfsSemanaisAcompTab() {
-    var week = prodWeekLabel();
-    var rows = PLANO_ROWS.map(function (r) {
+    var etapasUnicas = ['Todos'].concat(PLANO_ROWS.map(planoProcessoEtapa).filter(function (v, i, a) { return a.indexOf(v) === i; }));
+    var centrosUnicos = ['Todos'].concat(PLANO_ROWS.map(planoProcessoCentro).filter(function (v, i, a) { return a.indexOf(v) === i; }));
+    var filtered = PLANO_ROWS.filter(function (r) {
+      return (prodState.processoEtapa === 'Todos' || planoProcessoEtapa(r) === prodState.processoEtapa) &&
+        (prodState.processoCentro === 'Todos' || planoProcessoCentro(r) === prodState.processoCentro);
+    });
+    var rows = filtered.map(function (r) {
       var totalPlaneado = r.objetivoBase * 5;
       var totalProduzido = 0;
       for (var di = 0; di < 5; di++) totalProduzido += genDay(r.seed, di, r.objetivoBase).producao;
       return { ofSemanal: 'SEM' + isoWeekNumber(prodState.weekMonday) + '/26-' + r.of.slice(-3), processo: r.processo, artigo: r.artigo, planeado: totalPlaneado, produzido: totalProduzido, of: r.of };
     });
-    var toolbar = '<div class="prod-toolbar">' + weekNavHtml() + '<div class="toolbar-spacer"></div><div class="stat-inline">' + week + '</div></div>';
+    var progSemana = rows.length ? Math.round((rows.reduce(function (a, r) { return a + r.produzido; }, 0) / rows.reduce(function (a, r) { return a + r.planeado; }, 0)) * 100) : 0;
+
+    var toolbar = '<div class="prod-toolbar">' + weekNavHtml() +
+      labeledSelect('Processo', 'prodProcessoEtapa', etapasUnicas, prodState.processoEtapa) +
+      labeledSelect('Centro de Trabalho', 'prodProcessoCentro', centrosUnicos, prodState.processoCentro) +
+      '<div class="toolbar-spacer"></div>' +
+      '<div class="progress-indicator">Progresso da Semana<strong>' + progSemana + '%</strong></div>' +
+      '</div>';
     var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>OF Semanal</th><th>Processo</th><th>Artigo</th><th>Planeado</th><th>Produzido</th><th>%</th></tr></thead><tbody>' +
       rows.map(function (r) {
         var pct = Math.round((r.produzido / r.planeado) * 100);
