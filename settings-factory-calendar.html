@@ -3416,7 +3416,11 @@
       '</div>';
 
     var toolbar2 = isNdtech
-      ? '<div class="prod-toolbar"><span class="stat-inline">' + seqFilteredIndexes().length + ' linhas</span></div>'
+      ? '<div class="prod-toolbar">' +
+        '<span class="stat-inline">' + seqFilteredIndexes().length + ' linhas</span>' +
+        '<div class="toolbar-spacer"></div>' +
+        '<button class="btn' + (seqState.bloqueado ? '' : ' btn-primary') + '" id="seqBloquear">' + svg('lock', 'width="14" height="14"') + ' ' + (seqState.bloqueado ? 'DESBLOQUEAR PLANEAMENTO' : 'BLOQUEAR PLANEAMENTO') + '</button>' +
+        '</div>'
       : '<div class="prod-toolbar">' +
         '<span class="stat-inline">' + seqFilteredIndexes().length + ' linhas</span>' +
         '<div class="chip-group">' + gruposUnicos.map(function (g) {
@@ -3428,7 +3432,7 @@
         '</div>';
 
     var body = view === 'lista' ? renderSeqList() : renderSeqKanban();
-    var bloqueadoBanner = (!isNdtech && seqState.bloqueado) ? '<div class="section-banner" style="margin:10px 14px 0;">' + svg('lock', 'width="13" height="13"') + ' Planeamento bloqueado — o sequenciamento não pode ser alterado até ser desbloqueado.</div>' : '';
+    var bloqueadoBanner = seqState.bloqueado ? '<div class="section-banner" style="margin:10px 14px 0;">' + svg('lock', 'width="13" height="13"') + ' Planeamento bloqueado — o sequenciamento não pode ser alterado até ser desbloqueado.</div>' : '';
 
     card.innerHTML = toolbar1 + toolbar2 + bloqueadoBanner + body;
     bindSeqBodyEvents();
