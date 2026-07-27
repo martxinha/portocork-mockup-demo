@@ -3308,6 +3308,12 @@
   function activeSeqRows() { return state.globalFlow === 'ndtech' ? NDTECH_SEQ_ROWS : SEQ_ROWS; }
   function activeSeqMachines() { return state.globalFlow === 'ndtech' ? NDTECH_SEQ_MACHINES : SEQ_MACHINES; }
   function activeSeqGrupos() { return state.globalFlow === 'ndtech' ? NDTECH_SEQ_GRUPOS : SEQ_GRUPOS; }
+  function seqCentro(row) { var parts = row.maquina.split(' · '); return parts.length > 1 ? parts[1] : row.maquina; }
+  function activeSeqCentros() {
+    var seen = [];
+    activeSeqRows().forEach(function (r) { var c = seqCentro(r); if (seen.indexOf(c) === -1) seen.push(c); });
+    return seen;
+  }
 
   function seqProgressPct(row) { return row.objetivo ? Math.round((row.producao / row.objetivo) * 100) : 0; }
 
@@ -3376,7 +3382,7 @@
     var indexes = seqFilteredIndexes();
     var byMachine = {};
     indexes.forEach(function (idx) {
-      var m = rows[idx].maquina;
+      var m = seqCentro(rows[idx]);
       (byMachine[m] = byMachine[m] || []).push(idx);
     });
     return '<div class="kanban-board">' + Object.keys(byMachine).map(function (m) {
