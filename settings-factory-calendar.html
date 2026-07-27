@@ -1197,6 +1197,7 @@
     gear: '<path d="M12 2.5 20 7v10l-8 4.5-8-4.5V7z"/><circle cx="12" cy="12" r="3"/>',
     pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>',
     plus: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+    eye: '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',
     download: '<path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/>',
     upload: '<path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M4 19h16"/>',
     flask: '<path d="M9 3h6"/><path d="M10 3v6.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9.5V3"/><path d="M7.5 14h9"/>',
@@ -2925,7 +2926,7 @@
       '<div class="toolbar-spacer"></div>' +
       '<button class="btn" id="capExportarOfs">' + svg('download', 'width="14" height="14"') + ' EXPORTAR OFS</button>' +
       '</div>';
-    var head = '<th style="position:sticky;top:0;z-index:2;">Semana</th><th style="position:sticky;top:0;z-index:2;">Ações</th>' + capGroups().map(function (g) { return '<th style="position:sticky;top:0;z-index:2;">' + g + '</th>'; }).join('');
+    var head = '<th style="position:sticky;top:0;z-index:2;width:110px;min-width:110px;max-width:110px;">Semana</th><th style="position:sticky;top:0;z-index:2;">Ações</th>' + capGroups().map(function (g) { return '<th style="position:sticky;top:0;z-index:2;">' + g + '</th>'; }).join('');
     var rowsHtml = [];
     for (var wi = capState.startIdx; wi <= capState.endIdx; wi++) {
       var w = weeks[wi];
@@ -2940,10 +2941,10 @@
           '<div style="font-size:10px;color:var(--text-muted);">(' + fmtPct(cum) + '%)</div></td>';
       }).join('');
       var acoes = '<td class="prod-cell">' +
-        '<button class="icon-inline-btn" data-mark="' + wi + '" title="' + (validado ? 'Validado' : 'Por validar') + '" style="color:' + (validado ? 'var(--evt-closure)' : 'var(--evt-holiday)') + ';">' + svg('check', 'width="14" height="14"') + '</button>' +
-        '<button class="icon-inline-btn" data-eye="' + wi + '" title="Ver detalhe">👁</button>' +
+        '<button class="icon-inline-btn" data-mark="' + wi + '" title="' + (validado ? 'Validado' : 'Por validar') + '" style="color:' + (validado ? 'var(--evt-closure)' : 'var(--evt-holiday)') + ';">' + svg('calmonth', 'width="15" height="15"') + '</button>' +
+        '<button class="icon-inline-btn" data-eye="' + wi + '" title="Ver detalhe" style="color:var(--brand-primary);">' + svg('eye', 'width="15" height="15"') + '</button>' +
         '</td>';
-      rowsHtml.push('<tr><td><div style="font-weight:700;">S.' + isoWeekNumber(w) + ' A.' + w.getFullYear() + '</div><div style="font-size:10.5px;color:var(--text-muted);">' + fmtDM(w) + ' - ' + fmtDM(friday) + '</div></td>' + acoes + cells + '</tr>');
+      rowsHtml.push('<tr><td style="width:110px;min-width:110px;max-width:110px;"><div style="font-weight:700;">S.' + isoWeekNumber(w) + ' A.' + w.getFullYear() + '</div><div style="font-size:10.5px;color:var(--text-muted);">' + fmtDM(w) + ' - ' + fmtDM(friday) + '</div></td>' + acoes + cells + '</tr>');
     }
     return rangeToolbar + '<div class="prod-table-wrap" style="max-height:calc(100vh - 300px);overflow-y:auto;"><table class="prod-table"><thead><tr>' + head + '</tr></thead><tbody>' + rowsHtml.join('') + '</tbody></table></div>';
   }
@@ -3173,7 +3174,7 @@
     var viewToggle = '<div class="chip-group">' +
       '<div class="chip-filter' + (capState.view === 'tabela' ? ' active' : '') + '" data-view="tabela">Tabela Semanal</div>' +
       '<div class="chip-filter' + (capState.view === 'porCentro' ? ' active' : '') + '" data-view="porCentro">Por Centro de Trabalho</div>' +
-      '<div class="chip-filter' + (capState.view === 'grafico' ? ' active' : '') + '" data-view="grafico">Gráfico Geral</div>' +
+      '<div class="chip-filter' + (capState.view === 'grafico' ? ' active' : '') + '" data-view="grafico">Evolução Temporal</div>' +
       '</div>';
     var toolbar = '<div class="prod-toolbar"><div class="filter-label" style="align-self:center;">Visão Global</div><div class="toolbar-spacer"></div>' + viewToggle + '</div>';
     var body = capState.view === 'tabela' ? renderCapTable() : capState.view === 'porCentro' ? renderCapPorCentroTable() : renderCapChart();
