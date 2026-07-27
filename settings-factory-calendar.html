@@ -736,6 +736,8 @@
     white-space: nowrap;
     text-align: left;
   }
+  .table-compact.prod-table { font-size: 11px; }
+  .table-compact.prod-table th, .table-compact.prod-table td { padding: 3px 6px; }
   .prod-table thead th {
     background: var(--brand-primary);
     color: #FFFFFF;
@@ -2162,7 +2164,6 @@
   }
 
   var ENC_COLUMNS = [
-    { key: 'ov', label: 'OV/Item', render: function (r) { return r.ov; } },
     { key: 'pais', label: 'País Destino', center: true, render: function (r) { return r.pais; } },
     { key: 'soldTo', label: 'Sold To', render: function (r) { return r.soldTo; } },
     { key: 'shipTo', label: 'Ship To', render: function (r) { return r.shipTo; } },
@@ -2333,19 +2334,29 @@
       '</div>' +
       '</div>';
 
+    var ENC_W = [78, 32, 56, 66, 104];
+    var ENC_FROZEN = [0, ENC_W[0], ENC_W[0] + ENC_W[1], ENC_W[0] + ENC_W[1] + ENC_W[2], ENC_W[0] + ENC_W[1] + ENC_W[2] + ENC_W[3]];
+    function frozenStyle(i, extra) { return 'position:sticky;left:' + ENC_FROZEN[i] + 'px;width:' + ENC_W[i] + 'px;min-width:' + ENC_W[i] + 'px;max-width:' + ENC_W[i] + 'px;' + (extra || ''); }
+
     var rowsHtml = rows.map(function (r) {
       var trueIdx = ENCOMENDAS_ROWS.indexOf(r);
-      return '<tr' + (r.sto.alert ? ' style="background:var(--evt-holiday-bg);"' : '') + '>' +
-        '<td class="prod-cell"><button class="icon-inline-btn" title="Sincronizar">' + svg('refresh', 'width="13" height="13"') + '</button><button class="icon-inline-btn" title="Configurar">' + svg('gear', 'width="13" height="13"') + '</button><button class="icon-inline-btn" data-balanco-idx="' + trueIdx + '" title="Balanço de Stock">' + svg('orders', 'width="13" height="13"') + '</button></td>' +
-        '<td class="prod-cell"><input type="checkbox" data-enc-select="' + r.ov + '"' + (encSelected[r.ov] ? ' checked' : '') + '></td>' +
-        '<td class="prod-cell"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--text-muted);"></span></td>' +
-        '<td class="prod-cell">' + encomendaStoBadge(r.sto) + '</td>' +
+      var rowBg = r.sto.alert ? 'var(--evt-holiday-bg)' : 'var(--surface)';
+      return '<tr>' +
+        '<td class="prod-cell" style="' + frozenStyle(0, 'z-index:2;background:' + rowBg + ';padding-left:2px;padding-right:2px;') + '"><button class="icon-inline-btn" title="Sincronizar">' + svg('refresh', 'width="13" height="13"') + '</button><button class="icon-inline-btn" title="Configurar">' + svg('gear', 'width="13" height="13"') + '</button><button class="icon-inline-btn" data-balanco-idx="' + trueIdx + '" title="Balanço de Stock">' + svg('orders', 'width="13" height="13"') + '</button></td>' +
+        '<td class="prod-cell" style="' + frozenStyle(1, 'z-index:2;background:' + rowBg + ';') + '"><input type="checkbox" data-enc-select="' + r.ov + '"' + (encSelected[r.ov] ? ' checked' : '') + '></td>' +
+        '<td class="prod-cell" style="' + frozenStyle(2, 'z-index:2;background:' + rowBg + ';') + '"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--text-muted);"></span></td>' +
+        '<td class="prod-cell" style="' + frozenStyle(3, 'z-index:2;background:' + rowBg + ';') + '">' + encomendaStoBadge(r.sto) + '</td>' +
+        '<td style="' + frozenStyle(4, 'z-index:2;background:' + rowBg + ';box-shadow:4px 0 6px -2px rgba(0,0,0,0.15);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;') + '" title="' + r.ov + '">' + r.ov + '</td>' +
         visibleCols.map(function (c) { return '<td' + (c.center ? ' class="prod-cell"' : '') + '>' + c.render(r) + '</td>'; }).join('') +
         '</tr>';
     }).join('');
 
-    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr>' +
-      '<th></th><th></th><th>Stock Disp.</th><th>STO</th>' +
+    var table = '<div class="prod-table-wrap"><table class="prod-table table-compact"><thead><tr>' +
+      '<th style="' + frozenStyle(0, 'z-index:3;background:var(--brand-primary);') + '"></th>' +
+      '<th style="' + frozenStyle(1, 'z-index:3;background:var(--brand-primary);') + '"></th>' +
+      '<th style="' + frozenStyle(2, 'z-index:3;background:var(--brand-primary);') + '">Stock Disp.</th>' +
+      '<th style="' + frozenStyle(3, 'z-index:3;background:var(--brand-primary);') + '">STO</th>' +
+      '<th style="' + frozenStyle(4, 'z-index:3;background:var(--brand-primary);box-shadow:4px 0 6px -2px rgba(0,0,0,0.15);') + '">OV/Item</th>' +
       visibleCols.map(function (c) { return '<th>' + c.label + '</th>'; }).join('') +
       '</tr></thead><tbody>' + rowsHtml + '</tbody></table></div>';
     var footer = '<div class="table-footer">Linhas por página <select class="filter-select" style="min-width:60px" disabled><option>50</option></select><span class="toolbar-spacer"></span>1-' + rows.length + ' of ' + rows.length + '</div>';
@@ -2914,7 +2925,7 @@
       '<div class="toolbar-spacer"></div>' +
       '<button class="btn" id="capExportarOfs">' + svg('download', 'width="14" height="14"') + ' EXPORTAR OFS</button>' +
       '</div>';
-    var head = '<th>Semana</th><th>Ações</th>' + capGroups().map(function (g) { return '<th>' + g + '</th>'; }).join('');
+    var head = '<th style="position:sticky;top:0;z-index:2;">Semana</th><th style="position:sticky;top:0;z-index:2;">Ações</th>' + capGroups().map(function (g) { return '<th style="position:sticky;top:0;z-index:2;">' + g + '</th>'; }).join('');
     var rowsHtml = [];
     for (var wi = capState.startIdx; wi <= capState.endIdx; wi++) {
       var w = weeks[wi];
@@ -2934,7 +2945,7 @@
         '</td>';
       rowsHtml.push('<tr><td><div style="font-weight:700;">S.' + isoWeekNumber(w) + ' A.' + w.getFullYear() + '</div><div style="font-size:10.5px;color:var(--text-muted);">' + fmtDM(w) + ' - ' + fmtDM(friday) + '</div></td>' + acoes + cells + '</tr>');
     }
-    return rangeToolbar + '<div class="prod-table-wrap"><table class="prod-table"><thead><tr>' + head + '</tr></thead><tbody>' + rowsHtml.join('') + '</tbody></table></div>';
+    return rangeToolbar + '<div class="prod-table-wrap" style="max-height:calc(100vh - 300px);overflow-y:auto;"><table class="prod-table"><thead><tr>' + head + '</tr></thead><tbody>' + rowsHtml.join('') + '</tbody></table></div>';
   }
 
   function capDetailRows(weekIdx, groupIdx) {
@@ -3154,7 +3165,7 @@
       '<div class="chip-filter' + (capState.view === 'porCentro' ? ' active' : '') + '" data-view="porCentro">Por Centro de Trabalho</div>' +
       '<div class="chip-filter' + (capState.view === 'grafico' ? ' active' : '') + '" data-view="grafico">Gráfico Geral</div>' +
       '</div>';
-    var toolbar = '<div class="prod-toolbar"><div class="stat-inline">Carga de capacidade por semana e grupo · ' + CAP_FLOW_LABELS[state.globalFlow] + '</div><div class="toolbar-spacer"></div>' + viewToggle + '</div>';
+    var toolbar = '<div class="prod-toolbar"><div class="toolbar-spacer"></div>' + viewToggle + '</div>';
     var body = capState.view === 'tabela' ? renderCapTable() : capState.view === 'porCentro' ? renderCapPorCentroTable() : renderCapChart();
     card.innerHTML = toolbar + body;
     card.querySelectorAll('[data-view]').forEach(function (btn) {
