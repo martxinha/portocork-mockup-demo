@@ -2722,49 +2722,25 @@
 
   function bindOfsPorLiberarControls() { renderOfsPorLiberarBody(); }
 
-  var ofsPorLiberarSelected = {};
-
   function renderOfsPorLiberarBody() {
     var card = document.getElementById('ofsPorLiberarCard');
-    var nSelected = Object.keys(ofsPorLiberarSelected).filter(function (k) { return ofsPorLiberarSelected[k]; }).length;
     var toolbar = '<div class="prod-toolbar">' +
       '<button class="icon-inline-btn" id="ofsPorLiberarInfo" title="OFs pendentes de liberação para produção">ⓘ</button>' +
       '<div class="stat-inline">' + OFS_POR_LIBERAR_ROWS.length + ' OFs</div>' +
       '<div class="toolbar-spacer"></div>' +
-      '<button class="btn btn-success" id="ofsPorLiberarLiberar">' + svg('check', 'width="14" height="14"') + ' LIBERAR' + (nSelected ? ' (' + nSelected + ')' : '') + '</button>' +
       '<button class="btn btn-primary" id="ofsPorLiberarExportar">' + svg('download', 'width="14" height="14"') + ' EXPORTAR</button>' +
       '</div>';
-    var rowsHtml = OFS_POR_LIBERAR_ROWS.map(function (r, idx) {
-      return '<tr><td class="prod-cell"><input type="checkbox" data-ofsliberar-select="' + idx + '"' + (ofsPorLiberarSelected[idx] ? ' checked' : '') + '></td><td>' + r.centro + '</td><td>' + r.material + '</td><td>' + r.texto + '</td><td>' + r.componente + '</td>' +
+    var rowsHtml = OFS_POR_LIBERAR_ROWS.map(function (r) {
+      return '<tr><td>' + r.centro + '</td><td>' + r.material + '</td><td>' + r.texto + '</td><td>' + r.componente + '</td>' +
         '<td>' + (r.cliente || '<span style="color:var(--text-muted)">—</span>') + '</td><td>' + r.ordem + '</td>' +
         '<td class="prod-cell">' + r.tipo + '</td><td class="prod-cell">' + r.qtd + '</td>' +
         '<td>' + r.inicio + '</td><td>' + r.fim + '</td>' +
         '<td class="prod-cell">' + (r.alerta ? '<span class="stat-pill pill-warn">⚠</span>' : '<span class="stat-pill pill-neutral">—</span>') + '</td></tr>';
     }).join('');
-    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th></th><th>Centro de Trabalho</th><th>Material de Produção</th><th>Texto Breve Material</th><th>Componente</th><th>Cliente</th><th>Ordem Produção / Planeada</th><th>Tipo Ordem</th><th>Qtd. Total Ordem</th><th>Data Início Produção</th><th>Data Fim Produção</th><th>Alertas</th></tr></thead><tbody>' + (rowsHtml || '<tr><td colspan="11"><div class="empty-state">Sem OFs por liberar.</div></td></tr>') + '</tbody></table></div>';
+    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Centro de Trabalho</th><th>Material de Produção</th><th>Texto Breve Material</th><th>Componente</th><th>Cliente</th><th>Ordem Produção / Planeada</th><th>Tipo Ordem</th><th>Qtd. Total Ordem</th><th>Data Início Produção</th><th>Data Fim Produção</th><th>Alertas</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>';
     card.innerHTML = toolbar + table + '<div class="table-footer">Linhas por página <select class="filter-select" style="min-width:60px" disabled><option>50</option></select><span class="toolbar-spacer"></span>1-' + OFS_POR_LIBERAR_ROWS.length + ' of ' + OFS_POR_LIBERAR_ROWS.length + '</div>';
     document.getElementById('ofsPorLiberarInfo').addEventListener('click', function () { showToast('Lista de OFs de produção/planeadas pendentes de liberação (protótipo)'); });
     document.getElementById('ofsPorLiberarExportar').addEventListener('click', function () { showToast('Exportação gerada (protótipo)'); });
-    card.querySelectorAll('[data-ofsliberar-select]').forEach(function (cb) {
-      cb.addEventListener('change', function () {
-        ofsPorLiberarSelected[cb.getAttribute('data-ofsliberar-select')] = cb.checked;
-        renderOfsPorLiberarBody();
-      });
-    });
-    document.getElementById('ofsPorLiberarLiberar').addEventListener('click', function () {
-      var idxs = Object.keys(ofsPorLiberarSelected).filter(function (k) { return ofsPorLiberarSelected[k]; }).map(Number).sort(function (a, b) { return b - a; });
-      if (!idxs.length) { showToast('Selecione pelo menos uma OF'); return; }
-      idxs.forEach(function (i) { OFS_POR_LIBERAR_ROWS.splice(i, 1); });
-      ofsPorLiberarSelected = {};
-      showToast(idxs.length + ' OF(s) liberada(s)');
-      rerenderOfsPorLiberarPage();
-    });
-  }
-
-  function rerenderOfsPorLiberarPage() {
-    var main = document.getElementById('mainContent');
-    main.innerHTML = '<div class="section-page">' + ofsPorLiberarPageTemplate() + '</div>';
-    bindOfsPorLiberarControls();
   }
 
   /* ==================================================================
