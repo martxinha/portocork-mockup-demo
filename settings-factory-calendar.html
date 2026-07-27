@@ -2341,7 +2341,7 @@
     var rowsHtml = rows.map(function (r) {
       var trueIdx = ENCOMENDAS_ROWS.indexOf(r);
       var rowBg = r.sto.alert ? 'var(--evt-holiday-bg)' : 'var(--surface)';
-      return '<tr>' +
+      return '<tr style="background:' + rowBg + ';">' +
         '<td class="prod-cell" style="' + frozenStyle(0, 'z-index:2;background:' + rowBg + ';padding-left:2px;padding-right:2px;') + '"><button class="icon-inline-btn" title="Sincronizar">' + svg('refresh', 'width="13" height="13"') + '</button><button class="icon-inline-btn" title="Configurar">' + svg('gear', 'width="13" height="13"') + '</button><button class="icon-inline-btn" data-balanco-idx="' + trueIdx + '" title="Balanço de Stock">' + svg('orders', 'width="13" height="13"') + '</button></td>' +
         '<td class="prod-cell" style="' + frozenStyle(1, 'z-index:2;background:' + rowBg + ';') + '"><input type="checkbox" data-enc-select="' + r.ov + '"' + (encSelected[r.ov] ? ' checked' : '') + '></td>' +
         '<td class="prod-cell" style="' + frozenStyle(2, 'z-index:2;background:' + rowBg + ';') + '"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--text-muted);"></span></td>' +
