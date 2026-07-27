@@ -3359,7 +3359,7 @@
       '<td>' + row.material + '</td>' +
       '<td>' + row.materialConsumo + '<div><span class="stat-pill pill-neutral" style="font-size:9px;">' + row.consumoQtd + ' ML</span></div></td>' +
       '<td>' + row.grupo + '</td>' +
-      '<td>' + row.maquina + '</td>' +
+      '<td>' + seqCentro(row) + '</td>' +
       '<td><div class="progress-track" style="width:90px;margin-bottom:3px;"><div class="progress-fill" style="width:' + pct + '%;background:' + barColor + '"></div></div>' + fmt2(row.producao) + ' / ' + row.objetivo + ' ML · ' + pct + '%</td>' +
       '<td>' + row.data + '</td>' +
       '<td class="prod-cell">' + seqStockBadge(row) + '</td>' +
@@ -3372,7 +3372,7 @@
   function renderSeqList() {
     var indexes = seqFilteredIndexes();
     var note = seqCanDrag() ? '' : '<div class="section-banner" style="margin:10px 14px 0;">Remove os filtros para reordenar as linhas por arrastar — com filtros aplicados a ordem ficaria ambígua.</div>';
-    var head = '<thead><tr><th></th><th>#</th><th>OV/Linha</th><th>OF</th><th>Material</th><th>Material Consumo</th><th>Processo</th><th>Máquina</th><th>Progresso</th><th>Data</th><th>Stock</th><th></th></tr></thead>';
+    var head = '<thead><tr><th></th><th>#</th><th>OV/Linha</th><th>OF</th><th>Material</th><th>Material Consumo</th><th>Processo</th><th>Centro de Trabalho</th><th>Progresso</th><th>Data</th><th>Stock</th><th></th></tr></thead>';
     var body = '<tbody>' + indexes.map(renderSeqListRow).join('') + '</tbody>';
     return note + '<div class="prod-table-wrap"><table class="prod-table seq-table">' + head + body + '</table></div>';
   }
