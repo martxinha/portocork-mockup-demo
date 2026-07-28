@@ -4300,8 +4300,7 @@
       { key: 'cliente', label: 'Cliente' },
       { key: 'horas', label: 'Estabilização (horas)', center: true }
     ], ESTABILIZACAO_CLIENTE_ROWS, renderConfigOperacaoBody);
-    return '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Lead Time</h1></div>' + renderLeadTimeRule() +
-      '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Tempos de Estabilização por Tratamento</h1></div>' + tempos +
+    return '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Tempos de Estabilização por Tratamento</h1></div>' + tempos +
       '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Estabilização por Cliente (Exceções)</h1></div>' + clienteTable;
   }
 
@@ -4468,6 +4467,7 @@
   /* ---------------- Configurações > Operação ---------------- */
   var configOpState = { tab: 'compatibilidades' };
   var compatState = { tab: 'lavacaoMarcacao' };
+  var reprocCalibreState = { comprimento: '', diametro: '' };
   var CONFIG_OP_TABS = [
     { key: 'compatibilidades', label: 'Compatibilidades', flow: 'distribuicao' },
     { key: 'parametrizacoesNdtech', label: 'Parametrizações', flow: 'ndtech' },
@@ -4487,6 +4487,15 @@
 
   function visibleTabs(tabs) { return tabs.filter(function (t) { return !t.flow || t.flow === state.globalFlow; }); }
 
+  function renderReprocCalibreToolbar() {
+    return '<div class="field-row" style="padding:14px 14px 0;align-items:flex-end;">' +
+      '<div class="field" style="max-width:180px;"><label>Comprimento</label><input type="text" id="reprocCalibreComprimento" class="filter-select" value="' + reprocCalibreState.comprimento + '"></div>' +
+      '<div class="field" style="max-width:180px;"><label>Diâmetro</label><input type="text" id="reprocCalibreDiametro" class="filter-select" value="' + reprocCalibreState.diametro + '"></div>' +
+      '<div class="toolbar-spacer"></div>' +
+      '<div class="field" style="flex:none;"><button class="btn btn-primary" id="reprocCalibreSave" style="display:inline-flex;align-items:center;gap:6px;">Guardar' + svg('check', 'width="14" height="14"') + '</button></div>' +
+      '</div>';
+  }
+
   function renderCompatibilidades() {
     var tabs = visibleTabs(COMPAT_TABS);
     if (!tabs.some(function (t) { return t.key === compatState.tab; })) compatState.tab = tabs[0].key;
@@ -4494,7 +4503,7 @@
     var body;
     if (compatState.tab === 'lavacaoMarcacao') body = renderCompatMatrix(MARCA_TIPOS, LAVACAO_TIPOS, MATRIZ_LAVACAO, 'Tipo de Marca', true);
     else if (compatState.tab === 'reprocessamentoLavacao') body = renderCompatMatrix(LAVACAO_TIPOS, LAVACAO_TIPOS, REPROC_LAVACAO_MATRIZ, 'Lavação', true);
-    else body = renderCompatMatrix(CALIBRES_LIST, CALIBRES_LIST, REPROC_CALIBRE_MATRIZ, 'Calibre', true);
+    else body = renderReprocCalibreToolbar() + renderCompatMatrix(CALIBRES_LIST, CALIBRES_LIST, REPROC_CALIBRE_MATRIZ, 'Calibre', true);
     return tabsHtml + body;
   }
 
@@ -4557,6 +4566,14 @@
           showToast('Compatibilidade atualizada');
         });
       });
+      if (compatState.tab === 'reprocessamentoCalibre') {
+        var rcComprimento = body.querySelector('#reprocCalibreComprimento');
+        var rcDiametro = body.querySelector('#reprocCalibreDiametro');
+        if (rcComprimento) rcComprimento.addEventListener('input', function (e) { reprocCalibreState.comprimento = e.target.value; });
+        if (rcDiametro) rcDiametro.addEventListener('input', function (e) { reprocCalibreState.diametro = e.target.value; });
+        var rcSave = body.querySelector('#reprocCalibreSave');
+        if (rcSave) rcSave.addEventListener('click', function () { showToast('Reprocessamento de calibre guardado'); });
+      }
     } else if (configOpState.tab === 'prioridadesPlaneamento') {
       body.querySelectorAll('#prioTabs .prod-tab').forEach(function (tabEl) {
         tabEl.addEventListener('click', function () { prioPlaneamentoState.tab = tabEl.getAttribute('data-priotab'); renderConfigOperacaoBody(); });
