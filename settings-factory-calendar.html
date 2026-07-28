@@ -4132,7 +4132,6 @@
     { ov: '1420093205', componente: '60019468', material: '60019468', data: '2026-10-19', erro: 'Artigo sem Componente de Marcação.' }
   ];
   var ALERTAS_TOTAL = 686;
-  var alertasState = { busca: '' };
 
   function alertasPageTemplate() {
     return '<div class="content-card" id="alertasCard"></div>';
@@ -4142,14 +4141,7 @@
 
   function renderAlertasBody() {
     var card = document.getElementById('alertasCard');
-    var rows = ALERTAS_ROWS.filter(function (r) {
-      if (!alertasState.busca) return true;
-      var q = alertasState.busca.toLowerCase();
-      return (r.ov + r.componente + r.material + r.erro).toLowerCase().indexOf(q) !== -1;
-    });
-    var toolbar = '<div class="prod-toolbar">' +
-      '<input type="text" class="filter-select" id="alertasBusca" placeholder="Pesquisar..." style="min-width:260px;" value="' + escapeHtml(alertasState.busca) + '">' +
-      '</div>';
+    var rows = ALERTAS_ROWS;
     var rowsHtml = rows.map(function (r) {
       return '<tr><td><a style="color:var(--brand-primary);font-weight:600;">' + r.ov + '</a></td><td>' + r.componente + '</td><td>' + r.material + '</td><td>' + r.data + '</td><td>' + r.erro + '</td></tr>';
     }).join('');
@@ -4161,8 +4153,7 @@
       '<button class="icon-inline-btn" id="alertasNext" title="Próxima página">›</button>' +
       '<button class="icon-inline-btn" id="alertasLast" title="Última página">»</button>' +
       '</div>';
-    card.innerHTML = toolbar + table + footer;
-    document.getElementById('alertasBusca').addEventListener('input', function (e) { alertasState.busca = e.target.value; renderAlertasBody(); });
+    card.innerHTML = table + footer;
     var nextBtn = document.getElementById('alertasNext'), lastBtn = document.getElementById('alertasLast');
     if (nextBtn) nextBtn.addEventListener('click', function () { showToast('Próxima página (protótipo)'); });
     if (lastBtn) lastBtn.addEventListener('click', function () { showToast('Última página (protótipo)'); });
