@@ -4524,31 +4524,10 @@
     { atual: 'LAV001 · Lavação', seguinte: 'NDR001/NDC001 · NDTech (Prestação de Serviços)', dias: 3, nota: 'Espera por artigos de fornecedor externo quando a lavação interna está sobrecarregada', flow: 'ndtech' }
   ];
 
-  var ACORDOS_LOGISTICOS_ROWS = [
-    { cliente: 'CASA VINHOS DA QUINTA, LDA.', codigoMaterial: '60046046', descricaoMaterial: 'RT XPUR_FMC 44X24 CF CLEAR M T E', quantidade: 170, leadTime: 3 },
-    { cliente: 'ADEGA DO MONTE, LDA.', codigoMaterial: '60019462', descricaoMaterial: 'RT NEUT 44X24 CF CL0 M T E', quantidade: 200, leadTime: 4 },
-    { cliente: 'QUINTA DO SOBREIRO, CRL', codigoMaterial: '60019423', descricaoMaterial: 'RT NEUT 38X24 CF CLEAR M T E', quantidade: 60, leadTime: 5 },
-    { cliente: 'BODEGAS DEL NORTE, S.L.', codigoMaterial: '60019423', descricaoMaterial: 'RT NEUT 38X24 CF CLEAR M T E', quantidade: 100, leadTime: 7 },
-    { cliente: 'CANTINE DEL SUD, S.R.L.', codigoMaterial: '60019520', descricaoMaterial: 'RT NEUT_FMC 44X23 CF CLEAR M T E', quantidade: 340, leadTime: 10 },
-    { cliente: 'AMORIM CORK ITALIA, S.P.A.', codigoMaterial: '60041804', descricaoMaterial: 'RT XPUR 44X24 CF CL0 M T E', quantidade: 100, leadTime: 7 },
-    { cliente: 'BODEGAS RIOJA ALTA, S.A.', codigoMaterial: '60019469', descricaoMaterial: 'RT NEUT 44X24 CF CLEAR M T E', quantidade: 120, leadTime: 10 },
-    { cliente: 'HAMMEKEN CELLARS, S.L.', codigoMaterial: '60041796', descricaoMaterial: 'RT XPUR 44X24 CF CLEAR M T E', quantidade: 60, leadTime: 5 }
-  ];
-
   function renderLeadTimesComExcecoes() {
     var rows = LEAD_TIMES_SETORES.filter(function (r) { return !r.flow || r.flow === state.globalFlow; });
     var setores = renderStaticTable([{ key: 'atual', label: 'Setor Atual' }, { key: 'seguinte', label: 'Setor Seguinte' }, { key: 'dias', label: 'Lead Time (dias)', center: true }, { key: 'nota', label: 'Nota', render: function (r) { return r.nota || '<span style="color:var(--text-muted)">—</span>'; } }], rows, renderConfigRecursosBody);
     return '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Lead Times entre Processos</h1></div>' + setores;
-  }
-
-  function renderAcordosLogisticos() {
-    return renderStaticTable([
-      { key: 'cliente', label: 'Cliente' },
-      { key: 'codigoMaterial', label: 'Código Material' },
-      { key: 'descricaoMaterial', label: 'Descrição Material' },
-      { key: 'quantidade', label: 'Quantidade', center: true },
-      { key: 'leadTime', label: 'Lead Time', center: true }
-    ], ACORDOS_LOGISTICOS_ROWS, renderConfigRecursosBody);
   }
 
   var MULTIPLOS_PALETE = [
@@ -5097,7 +5076,6 @@
     { key: 'prioridades', label: 'Prioridades' },
     { key: 'restricoes', label: 'Restrições' },
     { key: 'preferencias', label: 'Preferências' },
-    { key: 'acordosLogisticos', label: 'Acordos Logísticos' },
     { key: 'gruposCentros', label: 'Centros de Trabalho' },
     { key: 'mapeamentoDepositos', label: 'Mapeamento de Depósitos' },
     { key: 'ocupacaoMaxima', label: 'Parametrizações' }
@@ -5156,7 +5134,6 @@
     if (key === 'turnos') return renderTurnosBodyHtml();
     if (key === 'setups') return renderStaticTable([{ key: 'setor', label: 'Setor' }, { key: 'variavel', label: 'Variável(eis) de Setup' }, { key: 'min', label: 'Setup min (mins)', center: true }, { key: 'troca', label: 'Setup troca (mins)', center: true }], SETUPS_ROWS, renderConfigRecursosBody);
     if (key === 'leadtimes') return renderLeadTimesComExcecoes();
-    if (key === 'acordosLogisticos') return renderAcordosLogisticos();
     if (key === 'gruposCentros') return renderStaticTable([{ key: 'centro', label: 'Centro de Trabalho' }, { key: 'grupo', label: 'Grupo' }], GRUPOS_CENTROS_TRABALHO, renderConfigRecursosBody);
     if (key === 'prioridades') return renderStaticTable([
       { key: 'grupo', label: 'Grupo' },
