@@ -591,6 +591,7 @@
   }
   .day-cell:hover { background: var(--calendar-cell-hover); }
   .day-cell.outside { color: var(--text-muted); opacity: 0.5; }
+  .day-cell.non-working { background: var(--surface-muted); }
   .day-cell .day-num {
     display: inline-flex;
     align-items: center;
@@ -652,6 +653,7 @@
     border-radius: 3px;
   }
   .mini-day.outside { color: var(--text-muted); opacity: 0.35; }
+  .mini-day.non-working { background: var(--surface-muted); }
   .mini-day:hover { background: var(--calendar-cell-hover); }
   .mini-day.today { font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--calendar-today-ring); border-radius: 50%; }
   .mini-day.has-Feriado { background: var(--evt-holiday-bg); color: var(--evt-holiday); font-weight: 700; }
@@ -1621,9 +1623,11 @@
       week.forEach(function (day) {
         var outside = day.getMonth() !== monthIdx;
         var isToday = sameDay(day, today);
+        var isWeekend = day.getDay() === 0 || day.getDay() === 6;
+        var nonWorking = isWeekend && state.globalFlow === 'distribuicao';
         var dateStr = toISODate(day);
         var dayEvents = eventsForDate(dateStr);
-        html += '<div class="day-cell' + (outside ? ' outside' : '') + (isToday ? ' today' : '') + '" data-date="' + dateStr + '">';
+        html += '<div class="day-cell' + (outside ? ' outside' : '') + (isToday ? ' today' : '') + (nonWorking ? ' non-working' : '') + '" data-date="' + dateStr + '">';
         html += '<span class="day-num">' + day.getDate() + '</span>';
         if (dayEvents.length) {
           html += '<div class="day-events">';
@@ -1664,9 +1668,11 @@
         week.forEach(function (day) {
           var outside = day.getMonth() !== m;
           var isToday = sameDay(day, today);
+          var isWeekend = day.getDay() === 0 || day.getDay() === 6;
+          var nonWorking = isWeekend && state.globalFlow === 'distribuicao';
           var dateStr = toISODate(day);
           var dayEvents = eventsForDate(dateStr);
-          var cls = 'mini-day' + (outside ? ' outside' : '') + (isToday ? ' today' : '');
+          var cls = 'mini-day' + (outside ? ' outside' : '') + (isToday ? ' today' : '') + (nonWorking ? ' non-working' : '');
           if (dayEvents.length) cls += ' has-' + typeClass(dayEvents[0].type);
           html += '<div class="' + cls + '" data-date="' + dateStr + '" title="' + (dayEvents.length ? escapeHtml(dayEvents.map(function (e) { return e.title; }).join(', ')) : '') + '">' + day.getDate() + '</div>';
         });
@@ -1719,6 +1725,7 @@
           '<div class="legend-item"><span class="legend-dot" style="background:var(--evt-bridge)"></span>Ponte</div>' +
           '<div class="legend-item"><span class="legend-dot" style="background:var(--evt-stop)"></span>Intervalo de Paragem</div>' +
           '<div class="legend-item"><span class="legend-dot" style="background:var(--evt-closure)"></span>Encerramento Programado</div>' +
+          (state.globalFlow === 'distribuicao' ? '<div class="legend-item"><span class="legend-dot" style="background:var(--surface-muted);border:1px solid var(--border-primary);"></span>Fim de Semana (não útil)</div>' : '') +
         '</div>' +
         '<div id="calendarBody"></div>' +
       '</div>';
