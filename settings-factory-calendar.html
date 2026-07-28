@@ -775,6 +775,35 @@
   .pill-bad { background: var(--evt-stop-bg); color: var(--evt-stop); }
   .pill-neutral { background: var(--surface-muted); color: var(--text-muted); }
 
+  .turno-grupo-row {
+    background: var(--surface-muted);
+    transition: background 0.12s ease;
+  }
+  .turno-grupo-row:hover { background: var(--calendar-cell-hover); }
+  .turno-grupo-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: var(--brand-primary);
+    color: #FFFFFF;
+    flex: none;
+  }
+  .turno-grupo-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    color: var(--text-muted);
+    transition: background 0.12s ease, transform 0.15s ease;
+  }
+  .turno-grupo-row:hover .turno-grupo-chevron { background: var(--surface); color: var(--brand-primary); }
+  .turno-grupo-chevron.open { transform: rotate(180deg); }
+
   .chart-wrap { padding: 14px; border-bottom: 1px solid var(--border-subtle); }
   .chart-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
   .chart-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; font-size: 10.5px; color: var(--text-secondary); }
@@ -1272,7 +1301,8 @@
     flask: '<path d="M9 3h6"/><path d="M10 3v6.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9.5V3"/><path d="M7.5 14h9"/>',
     lock: '<rect x="4" y="11" width="16" height="10" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
     star: '<path d="M12 2.5l2.9 6.26L22 9.77l-5 4.87 1.18 6.88L12 18.27l-6.18 3.25L7 14.64 2 9.77l7.1-1.01z"/>',
-    recycle: '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>'
+    recycle: '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
+    chevronDown: '<path d="M6 9l6 6 6-6"/>'
   };
 
   function svg(name, extra) {
@@ -4870,11 +4900,12 @@
       var expanded = !!turnosState.maquinasExpanded[grupo];
       var nExc = turnosExcecoesForGrupo(grupo).length;
       var nMaq = (TURNOS_MAQUINAS_ROWS[grupo] || []).length;
-      var header = '<div class="prod-toolbar" data-turno-maq-toggle="' + grupo + '" style="cursor:pointer;">' +
+      var header = '<div class="prod-toolbar turno-grupo-row" data-turno-maq-toggle="' + grupo + '" style="cursor:pointer;">' +
+        '<span class="turno-grupo-icon">' + svg('factory', 'width="14" height="14"') + '</span>' +
         '<span style="font-weight:700;flex:1;">' + grupo + '</span>' +
-        '<span class="stat-pill pill-neutral">' + nExc + ' exceção' + (nExc === 1 ? '' : 'ões') + '</span>' +
+        '<span class="stat-pill ' + (nExc > 0 ? 'pill-bad' : 'pill-neutral') + '">' + nExc + ' exceção' + (nExc === 1 ? '' : 'ões') + '</span>' +
         '<span class="stat-pill pill-neutral">' + nMaq + ' máquinas</span>' +
-        '<span style="color:var(--text-muted);">' + (expanded ? '▲' : '▼') + '</span>' +
+        '<span class="turno-grupo-chevron' + (expanded ? ' open' : '') + '">' + svg('chevronDown', 'width="16" height="16"') + '</span>' +
         '</div>';
       return header + (expanded ? renderTurnosMaquinasGrupoTable(grupo) : '');
     }).join('');
@@ -4899,10 +4930,11 @@
     var grupos = turnosGruposVisiveis().filter(turnosMatchesBusca).map(function (grupo) {
       var expanded = !!turnosState.excecoesExpanded[grupo];
       var nExc = turnosExcecoesForGrupo(grupo).length;
-      var header = '<div class="prod-toolbar" data-turno-exc-toggle="' + grupo + '" style="cursor:pointer;">' +
+      var header = '<div class="prod-toolbar turno-grupo-row" data-turno-exc-toggle="' + grupo + '" style="cursor:pointer;">' +
+        '<span class="turno-grupo-icon">' + svg('factory', 'width="14" height="14"') + '</span>' +
         '<span style="font-weight:700;flex:1;">' + grupo + '</span>' +
-        '<span class="stat-pill pill-neutral">' + nExc + ' exceção' + (nExc === 1 ? '' : 'ões') + '</span>' +
-        '<span style="color:var(--text-muted);">' + (expanded ? '▲' : '▼') + '</span>' +
+        '<span class="stat-pill ' + (nExc > 0 ? 'pill-bad' : 'pill-neutral') + '">' + nExc + ' exceção' + (nExc === 1 ? '' : 'ões') + '</span>' +
+        '<span class="turno-grupo-chevron' + (expanded ? ' open' : '') + '">' + svg('chevronDown', 'width="16" height="16"') + '</span>' +
         '</div>';
       return header + (expanded ? renderTurnosExcecoesGrupoTable(grupo) : '');
     }).join('');
