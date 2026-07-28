@@ -4989,13 +4989,27 @@
   }
 
   var PRIORIDADES_RECURSOS = [
-    { grupo: 'Escolha', maquinas: 'ESC001 › ESC002', flow: 'distribuicao' },
-    { grupo: 'Marcação Laser', maquinas: 'MLS001-M1 › MLS001-M2 › MLS001-M3', flow: 'distribuicao' },
-    { grupo: 'Marcação Fogo', maquinas: 'MFO001-M1 › MFO001-M2', flow: 'distribuicao' },
-    { grupo: 'Tratamento', maquinas: 'TRT002-M1 › TRT002-M3 › TRT001-M5', flow: 'distribuicao' },
-    { grupo: 'NDTech · Calibre 45x24 e 49x24', maquinas: 'Máquina 1 › Máquina 2 › Máquina 3 › Máquina 4 › Máquina 5 › Máquina 6', flow: 'ndtech', nota: 'Máq 1 a 6' },
-    { grupo: 'NDTech · Todos os Artigos', maquinas: 'Máquina 7 › Máquina 8 › Máquina 9 › Máquina 10', flow: 'ndtech', nota: 'Máq 7 a 10' },
-    { grupo: 'NDTech · Exceção (sem PS e G2)', maquinas: 'Máquina 11', flow: 'ndtech', nota: 'Máq 11: só 45x24 e 49x24 que não sejam PS e G2' }
+    { grupo: 'Escolha', maquina: 'ESC001', prioridade: 1, flow: 'distribuicao' },
+    { grupo: 'Escolha', maquina: 'ESC002', prioridade: 2, flow: 'distribuicao' },
+    { grupo: 'Marcação Laser', maquina: 'MLS001-M1', prioridade: 1, flow: 'distribuicao' },
+    { grupo: 'Marcação Laser', maquina: 'MLS001-M2', prioridade: 2, flow: 'distribuicao' },
+    { grupo: 'Marcação Laser', maquina: 'MLS001-M3', prioridade: 3, flow: 'distribuicao' },
+    { grupo: 'Marcação Fogo', maquina: 'MFO001-M1', prioridade: 1, flow: 'distribuicao' },
+    { grupo: 'Marcação Fogo', maquina: 'MFO001-M2', prioridade: 2, flow: 'distribuicao' },
+    { grupo: 'Tratamento', maquina: 'TRT002-M1', prioridade: 1, flow: 'distribuicao' },
+    { grupo: 'Tratamento', maquina: 'TRT002-M3', prioridade: 2, flow: 'distribuicao' },
+    { grupo: 'Tratamento', maquina: 'TRT001-M5', prioridade: 3, flow: 'distribuicao' },
+    { grupo: 'NDTech · Calibre 45x24 e 49x24', maquina: 'Máquina 1', prioridade: 1, flow: 'ndtech' },
+    { grupo: 'NDTech · Calibre 45x24 e 49x24', maquina: 'Máquina 2', prioridade: 2, flow: 'ndtech' },
+    { grupo: 'NDTech · Calibre 45x24 e 49x24', maquina: 'Máquina 3', prioridade: 3, flow: 'ndtech' },
+    { grupo: 'NDTech · Calibre 45x24 e 49x24', maquina: 'Máquina 4', prioridade: 4, flow: 'ndtech' },
+    { grupo: 'NDTech · Calibre 45x24 e 49x24', maquina: 'Máquina 5', prioridade: 5, flow: 'ndtech' },
+    { grupo: 'NDTech · Calibre 45x24 e 49x24', maquina: 'Máquina 6', prioridade: 6, flow: 'ndtech' },
+    { grupo: 'NDTech · Todos os Artigos', maquina: 'Máquina 7', prioridade: 1, flow: 'ndtech' },
+    { grupo: 'NDTech · Todos os Artigos', maquina: 'Máquina 8', prioridade: 2, flow: 'ndtech' },
+    { grupo: 'NDTech · Todos os Artigos', maquina: 'Máquina 9', prioridade: 3, flow: 'ndtech' },
+    { grupo: 'NDTech · Todos os Artigos', maquina: 'Máquina 10', prioridade: 4, flow: 'ndtech' },
+    { grupo: 'NDTech · Exceção (sem PS e G2)', maquina: 'Máquina 11', prioridade: 1, flow: 'ndtech', nota: 'Só 45x24 e 49x24 que não sejam PS e G2' }
   ];
 
   var RESTRICOES_ROWS = [
@@ -5011,12 +5025,6 @@
     { centro: 'TRT002', entrada: 'ARM-TRT-IN', saida: 'ARM-TRT-OUT' },
     { centro: 'EMB001', entrada: 'ARM-EMB-IN', saida: 'ARM-EMB-OUT' },
     { centro: 'EMB002', entrada: 'ARM-EMB-IN', saida: 'ARM-EMB-OUT' }
-  ];
-
-  var LOTES_ROWS = [
-    { setor: 'EMA001 · Escolha', grupo: '18', loteMin: 500, loteMax: 5000, nivel: 'Calibre', excecoesTxt: '60-0 24x45 · Extra, 20-0 24x45 · Primeira', overflow: 16 },
-    { setor: 'TRT001/TRT002 · Tratamento', grupo: '60K', loteMin: 500, loteMax: 10000, nivel: 'Calibre', excecoesTxt: '120-0 24x38', overflow: 0 },
-    { setor: 'MFO001/MLS001/MTI001 · Marcação', grupo: '18', loteMin: 100, loteMax: 8000, nivel: 'Composto', excecoesTxt: '18-0 24x45 · Natural', overflow: 20 }
   ];
 
   var PREFERENCIAS_MAQUINA_ROWS = [
@@ -5041,31 +5049,6 @@
   }
 
   function rankChipTone(rank) { return rank === 1 ? 'pill-good' : rank <= 3 ? 'pill-warn' : 'pill-bad'; }
-
-  var CADENCIAS_ROWS = [
-    { setor: 'EET002 · Escolha Eletrónica', grupo: 'Grupo 1', maquinas: ['Máquina 1 · EET002', 'Máquina 2 · EET002', 'Máquina 3 · EET002'], overflowMaquinas: 1, nivel: 'Calibre', cadencias: [{ rank: 8, calibre: '24x45' }, { rank: 8, calibre: '24x49' }, { rank: 8, calibre: '24x38' }], overflowCadencias: 6 },
-    { setor: 'MFO001 · Marcação Fogo', grupo: 'Grupo 1', maquinas: ['MFogo 02', 'MFogo 03', 'MFogo 06'], overflowMaquinas: 3, nivel: 'Calibre', cadencias: [{ rank: 7, calibre: '24x45' }], overflowCadencias: 0 },
-    { setor: 'NDR001 · NDTech', grupo: 'Grupo 1', maquinas: ['Máquina 1 · NDR001', 'Máquina 2 · NDR001'], overflowMaquinas: 2, nivel: 'Calibre', cadencias: [{ rank: 8, calibre: '24x45' }, { rank: 8, calibre: '24x38' }], overflowCadencias: 6 },
-    { setor: 'TRT001/TRT002 · Tratamento', grupo: 'Grupo 1', maquinas: ['Máquina 1 · TRT002'], overflowMaquinas: 0, nivel: 'Calibre', cadencias: [{ rank: 30, calibre: '24x45' }], overflowCadencias: 0 }
-  ];
-
-  var TAMBORADAS_ROWS = [
-    { setor: 'LAV001 · Lavação', grupo: '30K', maquinas: ['Lavação AI 19'], overflowMaquinas: 0, ciclos: [{ tipo: 'Natural', min: 123 }], overflowCiclos: 0 },
-    { setor: 'LAV001 · Lavação', grupo: '30K', maquinas: ['Lavação AI 18'], overflowMaquinas: 0, ciclos: [{ tipo: 'Clássica', min: 83 }], overflowCiclos: 0 },
-    { setor: 'LAV001 · Lavação', grupo: '100K', maquinas: ['Lavação AI 25'], overflowMaquinas: 0, ciclos: [{ tipo: 'CL0', min: 41 }, { tipo: 'CL2', min: 116 }], overflowCiclos: 1 },
-    { setor: 'LAV001 · Lavação', grupo: '100K', maquinas: ['Lavação AI 23'], overflowMaquinas: 0, ciclos: [{ tipo: 'CL0', min: 41 }, { tipo: 'CL2', min: 135 }], overflowCiclos: 3 },
-    { setor: 'LAV001 · Lavação', grupo: '3K', maquinas: ['Lavação AI 24'], overflowMaquinas: 0, ciclos: [{ tipo: 'H2O', min: 18 }, { tipo: 'Rosé', min: 73 }], overflowCiclos: 6 },
-    { setor: 'LAV001 · Lavação', grupo: '20K', maquinas: ['Lavação AI 15', 'Lavação AI 16', 'Lavação AI 17'], overflowMaquinas: 1, ciclos: [{ tipo: 'H2O', min: 15 }], overflowCiclos: 0 },
-    { setor: 'LAV001 · Lavação', grupo: '20K', maquinas: ['Lavação AI 01', 'Lavação AI 02', 'Lavação AI 03'], overflowMaquinas: 3, ciclos: [{ tipo: 'CL2', min: 112 }], overflowCiclos: 0 }
-  ];
-
-  var CONFIG_MAQUINA_TABS = [
-    { key: 'lotes', label: 'Lotes' },
-    { key: 'preferencias', label: 'Preferências' },
-    { key: 'cadencias', label: 'Cadências' },
-    { key: 'tamboradas', label: 'Tamboradas' }
-  ];
-  var configMaquinaState = { tab: 'lotes' };
 
   var OCUPACAO_MAXIMA_ROWS = [
     { deposito: 'PK02', descricao: '[PTK SM] Receção Rolhas' },
@@ -5117,7 +5100,7 @@
     { key: 'restricoes', label: 'Restrições' },
     { key: 'mapeamentoDepositos', label: 'Mapeamento de Depósitos' },
     { key: 'ocupacaoMaxima', label: 'Parametrizações' },
-    { key: 'configMaquina', label: 'Configurações de Máquina' }
+    { key: 'preferencias', label: 'Preferências' }
   ];
   var configRecState = { tab: 'setups' };
 
@@ -5168,55 +5151,6 @@
     return toggle + table;
   }
 
-  function renderCadencias() {
-    var rows = CADENCIAS_ROWS.map(function (r) {
-      var maquinasHtml = chipList(r.maquinas) + overflowChip(r.overflowMaquinas);
-      var cadenciasHtml = r.cadencias.map(function (c) {
-        return '<span class="stat-pill ' + rankChipTone(c.rank) + '" style="margin-right:4px;">#' + c.rank + ' ' + c.calibre + '</span>';
-      }).join('') + overflowChip(r.overflowCadencias);
-      return '<tr><td>' + r.setor + '</td><td class="prod-cell">' + r.grupo + '</td><td>' + maquinasHtml + '</td><td>' + r.nivel + '</td><td>' + cadenciasHtml + '</td><td class="prod-cell">' + protoActions() + '</td></tr>';
-    }).join('');
-    return '<div class="prod-toolbar"><div class="toolbar-spacer"></div><button class="btn btn-primary" id="cadAdicionar">+ Adicionar Cadência</button></div>' +
-      '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Setor</th><th>Grupo</th><th>Máquina</th><th>Nível</th><th>Cadências</th><th>Ações</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
-  }
-
-  function renderTamboradas() {
-    var toneCycle = ['pill-good', 'pill-bad', 'pill-warn', 'pill-neutral'];
-    var rows = TAMBORADAS_ROWS.map(function (r, ri) {
-      var maquinasHtml = chipList(r.maquinas) + overflowChip(r.overflowMaquinas);
-      var ciclosHtml = r.ciclos.map(function (c, ci) {
-        return '<span class="stat-pill ' + toneCycle[(ri + ci) % toneCycle.length] + '" style="margin-right:4px;">' + c.tipo + ' | ' + c.min + ' min</span>';
-      }).join('') + overflowChip(r.overflowCiclos);
-      return '<tr><td>' + r.setor + '</td><td class="prod-cell">' + r.grupo + '</td><td>' + maquinasHtml + '</td><td>' + ciclosHtml + '</td><td class="prod-cell">' + protoActions() + '</td></tr>';
-    }).join('');
-    return '<div class="prod-toolbar"><div class="toolbar-spacer"></div><button class="btn btn-primary" id="tambAdicionar">+ Adicionar Tamborada</button></div>' +
-      '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Setor</th><th>Grupo</th><th>Máquina</th><th>Duração do Ciclo (min)</th><th>Ações</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
-  }
-
-  function renderConfigMaquina() {
-    var tabs = CONFIG_MAQUINA_TABS;
-    if (!tabs.some(function (t) { return t.key === configMaquinaState.tab; })) configMaquinaState.tab = tabs[0].key;
-    var tabsHtml = renderTabsBar('configMaqTabs', tabs, configMaquinaState.tab, 'configmaqtab');
-    var body;
-    if (configMaquinaState.tab === 'lotes') {
-      body = renderStaticTable([
-        { key: 'setor', label: 'Setor' },
-        { key: 'grupo', label: 'Grupo', center: true },
-        { key: 'loteMin', label: 'Lote Mín.', center: true },
-        { key: 'loteMax', label: 'Lote Máx.', center: true, render: function (r) { return r.loteMax || '<span style="color:var(--text-muted)">—</span>'; } },
-        { key: 'nivel', label: 'Nível' },
-        { key: 'excecoesTxt', label: 'Exceção', render: function (r) { return r.excecoesTxt + (r.overflow ? ' <span class="stat-pill pill-neutral">+' + r.overflow + '</span>' : ''); } }
-      ], LOTES_ROWS, renderConfigRecursosBody);
-    } else if (configMaquinaState.tab === 'preferencias') {
-      body = renderPreferencias();
-    } else if (configMaquinaState.tab === 'cadencias') {
-      body = renderCadencias();
-    } else {
-      body = renderTamboradas();
-    }
-    return tabsHtml + body;
-  }
-
   function renderConfigRecursosBodyHtml() {
     var key = configRecState.tab;
     if (key === 'turnos') return renderTurnosBodyHtml();
@@ -5226,13 +5160,14 @@
     if (key === 'gruposCentros') return renderStaticTable([{ key: 'centro', label: 'Centro de Trabalho' }, { key: 'grupo', label: 'Grupo' }], GRUPOS_CENTROS_TRABALHO, renderConfigRecursosBody);
     if (key === 'prioridades') return renderStaticTable([
       { key: 'grupo', label: 'Grupo' },
-      { key: 'maquinas', label: 'Máquinas por Prioridade' },
+      { key: 'prioridade', label: 'Prioridade', center: true },
+      { key: 'maquina', label: 'Máquina' },
       { key: 'nota', label: 'Critério', render: function (r) { return r.nota || '<span style="color:var(--text-muted)">—</span>'; } }
     ], PRIORIDADES_RECURSOS.filter(function (r) { return !r.flow || r.flow === state.globalFlow; }), renderConfigRecursosBody);
     if (key === 'restricoes') return renderStaticTable([{ key: 'tipoMaquina', label: 'Tipo de Máquina' }, { key: 'calibre', label: 'Calibre' }, { key: 'lavacao', label: 'Lavação' }, { key: 'classe', label: 'Classe' }, { key: 'marcacao', label: 'Marcação' }, { key: 'tratamento', label: 'Tratamento' }, { key: 'restricao', label: 'Restrição' }], RESTRICOES_ROWS, renderConfigRecursosBody);
     if (key === 'mapeamentoDepositos') return renderStaticTable([{ key: 'centro', label: 'Centro de Trabalho' }, { key: 'entrada', label: 'Armazém de Entrada' }, { key: 'saida', label: 'Armazém de Saída' }], MAPEAMENTO_DEPOSITOS, renderConfigRecursosBody);
     if (key === 'ocupacaoMaxima') return renderOcupacaoMaxima();
-    return renderConfigMaquina();
+    return renderPreferencias();
   }
 
   function configRecursosPageTemplate() {
@@ -5258,24 +5193,13 @@
     body.innerHTML = renderConfigRecursosBodyHtml();
     if (configRecState.tab === 'turnos') {
       bindTurnosBody(body);
-    } else if (configRecState.tab === 'configMaquina') {
-      body.querySelectorAll('#configMaqTabs .prod-tab').forEach(function (tabEl) {
-        tabEl.addEventListener('click', function () { configMaquinaState.tab = tabEl.getAttribute('data-configmaqtab'); renderConfigRecursosBody(); });
+    } else if (configRecState.tab === 'preferencias') {
+      body.querySelectorAll('[data-prefview]').forEach(function (btn) {
+        btn.addEventListener('click', function () { preferenciasState.view = btn.getAttribute('data-prefview'); renderConfigRecursosBody(); });
       });
-      if (configMaquinaState.tab === 'preferencias') {
-        body.querySelectorAll('[data-prefview]').forEach(function (btn) {
-          btn.addEventListener('click', function () { preferenciasState.view = btn.getAttribute('data-prefview'); renderConfigRecursosBody(); });
-        });
-        var prefAdd = body.querySelector('#prefAdicionar');
-        if (prefAdd) prefAdd.addEventListener('click', function () { showToast('Preferência adicionada (protótipo)'); });
-      } else if (configMaquinaState.tab === 'cadencias') {
-        var cadAdd = body.querySelector('#cadAdicionar');
-        if (cadAdd) cadAdd.addEventListener('click', function () { showToast('Cadência adicionada (protótipo)'); });
-      } else if (configMaquinaState.tab === 'tamboradas') {
-        var tambAdd = body.querySelector('#tambAdicionar');
-        if (tambAdd) tambAdd.addEventListener('click', function () { showToast('Tamborada adicionada (protótipo)'); });
-      }
-      if (configMaquinaState.tab !== 'lotes') bindProtoActions(body);
+      var prefAdd = body.querySelector('#prefAdicionar');
+      if (prefAdd) prefAdd.addEventListener('click', function () { showToast('Preferência adicionada (protótipo)'); });
+      bindProtoActions(body);
     }
   }
 
