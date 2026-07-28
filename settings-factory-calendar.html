@@ -3033,14 +3033,14 @@
   ];
 
   function ofsListaStandardPageTemplate() {
-    var toolbar = '<div class="prod-toolbar"><div class="stat-inline">Materiais e quantidades geradas automaticamente para workcenters da categoria "standard_list".</div><div class="toolbar-spacer"></div>' +
+    var toolbar = '<div class="prod-toolbar"><div class="toolbar-spacer"></div>' +
       '<button class="btn" data-msg="Importação Excel (protótipo)" id="listaStdImportar">' + svg('upload', 'width="14" height="14"') + ' Importar Excel</button>' +
       '<button class="btn btn-primary" data-msg="Linha adicionada (protótipo)" id="listaStdAdicionar">Adicionar</button></div>';
-    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Workcenter</th><th>Material</th><th>Descrição</th><th>VP</th><th>Qtd Default (ML)</th></tr></thead><tbody>' +
+    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Centro de Trabalho</th><th>Material</th><th>Descrição</th><th>VP</th><th>Qtd Default (ML)</th></tr></thead><tbody>' +
       LISTA_STANDARD_ROWS.map(function (r) {
         return '<tr><td>' + r.workcenter + '</td><td>' + r.material + '</td><td>' + r.descricao + '</td><td><span class="stat-pill pill-neutral" style="font-size:9px;">VP 1</span> ' + r.workcenter + '_' + r.descricao + '</td><td class="prod-cell">' + r.qtd + '</td></tr>';
       }).join('') + '</tbody></table></div>';
-    return '<div class="content-card"><div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:15px;">Lista Standard de OFs</h1></div>' + toolbar + table + '</div>';
+    return '<div class="content-card">' + toolbar + table + '</div>';
   }
 
   function bindOfsListaStandardControls() {
@@ -3080,7 +3080,7 @@
     var body;
     if (ofsConfigState.tab === 'autoGeracao') {
       body = '<div class="prod-toolbar"><div class="toolbar-spacer"></div><button class="btn btn-primary" data-msg="Regra adicionada (protótipo)">Adicionar</button></div>' +
-        '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Workcenter</th><th>Categoria</th><th>Frequência</th><th>Consumos Permitidos</th><th>Sources</th><th>Lookbehind</th></tr></thead><tbody>' +
+        '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Centro de Trabalho</th><th>Categoria</th><th>Frequência</th><th>Consumos Permitidos</th><th>Sources</th><th>Lookbehind</th></tr></thead><tbody>' +
         OFS_CONFIG_ROWS.map(function (r) {
           return '<tr><td>' + r.workcenter + '</td><td>' + categoriaBadge(r.categoria) + '</td><td class="prod-cell"><span class="chip-filter active" style="cursor:default;">Semanal</span></td>' +
             '<td class="prod-cell"><span class="stat-pill ' + (r.consumos ? 'pill-good' : 'pill-neutral') + '">' + (r.consumos ? 'Sim' : 'Não') + '</span></td>' +
@@ -3089,7 +3089,7 @@
     } else {
       body = '<div class="empty-state">Sem regras de inatividade de fecho transcritas neste protótipo.</div>';
     }
-    return '<div class="content-card"><div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:15px;">Configuração de OFs</h1><p style="font-size:12px;color:var(--text-secondary);margin:4px 0 0;">Define o ciclo de vida das OFs por workcenter — geração automática e inatividade de fecho.</p></div>' + tabsHtml + body + '</div>';
+    return '<div class="content-card"><div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:15px;">Configuração de OFs</h1><p style="font-size:12px;color:var(--text-secondary);margin:4px 0 0;">Define o ciclo de vida das OFs por centro de trabalho — geração automática e inatividade de fecho.</p></div>' + tabsHtml + body + '</div>';
   }
 
   function bindOfsConfiguracoesControls() {
