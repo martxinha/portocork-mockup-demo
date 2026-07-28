@@ -4545,7 +4545,7 @@
     document.getElementById('leadTimeRuleOverlay').classList.add('open');
   }
 
-  function renderLeadTimes() {
+  function renderTemposEstabilizacaoSection(rerenderFn) {
     var tempos = renderStaticTable([
       { key: 'tratamento', label: 'Tratamento' },
       { key: 'ciclo1', label: 'Ciclo 1' },
@@ -4554,15 +4554,18 @@
       { key: 'ciclo2', label: 'Ciclo 2' },
       { key: 'desc2', label: 'Descrição' },
       { key: 'estab2', label: 'Estabilização', center: true, render: function (r) { return r.estab2 ? '<span style="' + (/\?\?/.test(r.estab2) ? 'background:var(--evt-holiday-bg);padding:2px 6px;border-radius:4px;' : '') + '">' + r.estab2 + '</span>' : ''; } }
-    ], TEMPOS_ESTABILIZACAO, renderConfigOperacaoBody);
+    ], TEMPOS_ESTABILIZACAO, rerenderFn);
     var clienteTable = renderStaticTable([
       { key: 'tratamento', label: 'Tratamento' },
       { key: 'cliente', label: 'Cliente' },
       { key: 'horas', label: 'Estabilização (horas)', center: true }
-    ], ESTABILIZACAO_CLIENTE_ROWS, renderConfigOperacaoBody);
-    return renderLeadTimeRule() +
-      '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Tempos de Estabilização por Tratamento</h1></div>' + tempos +
+    ], ESTABILIZACAO_CLIENTE_ROWS, rerenderFn);
+    return '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Tempos de Estabilização por Tratamento</h1></div>' + tempos +
       '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Estabilização por Cliente (Exceções)</h1></div>' + clienteTable;
+  }
+
+  function renderLeadTimes() {
+    return renderLeadTimeRule() + renderTemposEstabilizacaoSection(renderConfigOperacaoBody);
   }
 
   var APROVACAO_CONTRATO = [
@@ -4650,7 +4653,8 @@
   function renderLeadTimesComExcecoes() {
     var rows = LEAD_TIMES_SETORES.filter(function (r) { return !r.flow || r.flow === state.globalFlow; });
     var setores = renderStaticTable([{ key: 'atual', label: 'Setor Atual' }, { key: 'seguinte', label: 'Setor Seguinte' }, { key: 'dias', label: 'Lead Time (dias)', center: true }, { key: 'nota', label: 'Nota', render: function (r) { return r.nota || '<span style="color:var(--text-muted)">—</span>'; } }], rows, renderConfigRecursosBody);
-    return '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Lead Times entre Processos</h1></div>' + setores;
+    return '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Lead Times entre Processos</h1></div>' + setores +
+      renderTemposEstabilizacaoSection(renderConfigRecursosBody);
   }
 
   var MULTIPLOS_PALETE = [
