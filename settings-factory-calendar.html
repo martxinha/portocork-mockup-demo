@@ -955,6 +955,71 @@
   .field select.filter-select { height: auto; padding: 7px 9px; }
   .field-row { display: flex; gap: 10px; }
   .field-row .field { flex: 1; }
+  .num-stepper-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    padding: 8px 8px 8px 10px;
+    background: var(--surface);
+  }
+  .num-stepper-field label {
+    position: absolute;
+    top: -8px;
+    left: 9px;
+    background: var(--surface);
+    padding: 0 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .num-stepper-field input[type="number"] {
+    flex: 1;
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 13px;
+    color: var(--text-primary);
+    -moz-appearance: textfield;
+  }
+  .num-stepper-field input[type="number"]::-webkit-outer-spin-button,
+  .num-stepper-field input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .num-stepper-field .num-stepper-arrows {
+    display: flex;
+    flex-direction: column;
+    line-height: 0;
+  }
+  .num-stepper-field .num-stepper-arrows button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 1px 2px;
+    color: var(--text-secondary);
+    font-size: 9px;
+    line-height: 1;
+  }
+  .num-stepper-field .num-stepper-arrows button:hover { color: var(--brand-primary); }
+  .num-stepper-field .num-stepper-clear {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 11px;
+    padding: 0;
+  }
   .checkbox-row { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-secondary); }
   .modal-actions {
     display: flex;
@@ -4487,10 +4552,22 @@
 
   function visibleTabs(tabs) { return tabs.filter(function (t) { return !t.flow || t.flow === state.globalFlow; }); }
 
+  function renderNumStepperField(id, label, value) {
+    return '<div class="num-stepper-field" style="max-width:180px;">' +
+      '<label>' + label + '</label>' +
+      '<input type="number" id="' + id + '" value="' + (value || '') + '">' +
+      '<div class="num-stepper-arrows">' +
+      '<button type="button" data-stepper-up="' + id + '">▲</button>' +
+      '<button type="button" data-stepper-down="' + id + '">▼</button>' +
+      '</div>' +
+      '<button type="button" class="num-stepper-clear" data-stepper-clear="' + id + '">✕</button>' +
+      '</div>';
+  }
+
   function renderReprocCalibreToolbar() {
     return '<div class="field-row" style="padding:14px 14px 18px;align-items:flex-end;">' +
-      '<div class="field" style="max-width:180px;"><label>Comprimento</label><input type="text" id="reprocCalibreComprimento" class="filter-select" value="' + reprocCalibreState.comprimento + '"></div>' +
-      '<div class="field" style="max-width:180px;"><label>Diâmetro</label><input type="text" id="reprocCalibreDiametro" class="filter-select" value="' + reprocCalibreState.diametro + '"></div>' +
+      renderNumStepperField('reprocCalibreComprimento', 'Comprimento', reprocCalibreState.comprimento) +
+      renderNumStepperField('reprocCalibreDiametro', 'Diâmetro', reprocCalibreState.diametro) +
       '<div class="toolbar-spacer"></div>' +
       '<div class="field" style="flex:none;"><button class="btn btn-primary" id="reprocCalibreSave" style="display:inline-flex;align-items:center;gap:6px;">Guardar' + svg('check', 'width="14" height="14"') + '</button></div>' +
       '</div>';
@@ -4571,6 +4648,27 @@
         var rcDiametro = body.querySelector('#reprocCalibreDiametro');
         if (rcComprimento) rcComprimento.addEventListener('input', function (e) { reprocCalibreState.comprimento = e.target.value; });
         if (rcDiametro) rcDiametro.addEventListener('input', function (e) { reprocCalibreState.diametro = e.target.value; });
+        body.querySelectorAll('[data-stepper-up]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var input = document.getElementById(btn.getAttribute('data-stepper-up'));
+            input.value = (parseInt(input.value, 10) || 0) + 1;
+            input.dispatchEvent(new Event('input'));
+          });
+        });
+        body.querySelectorAll('[data-stepper-down]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var input = document.getElementById(btn.getAttribute('data-stepper-down'));
+            input.value = Math.max(0, (parseInt(input.value, 10) || 0) - 1);
+            input.dispatchEvent(new Event('input'));
+          });
+        });
+        body.querySelectorAll('[data-stepper-clear]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var input = document.getElementById(btn.getAttribute('data-stepper-clear'));
+            input.value = '';
+            input.dispatchEvent(new Event('input'));
+          });
+        });
         var rcSave = body.querySelector('#reprocCalibreSave');
         if (rcSave) rcSave.addEventListener('click', function () { showToast('Reprocessamento de calibre guardado'); });
       }
