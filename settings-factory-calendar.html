@@ -4899,11 +4899,22 @@
     { deposito: 'PK68', descricao: '[PTK] Stock para Expedição' }
   ];
 
+  var PARTICAO_OFS_ROWS = [
+    { quantidade: '>= 1000', numParticoes: 2, multiplosParticoes: '' }
+  ];
+
   function renderOcupacaoMaxima() {
-    return renderStaticTable([
+    var particao = renderStaticTable([
+      { key: 'quantidade', label: 'Quantidade' },
+      { key: 'numParticoes', label: 'Número de Partições', center: true },
+      { key: 'multiplosParticoes', label: 'Múltiplos de Partições', render: function (r) { return r.multiplosParticoes || '<span style="color:var(--text-muted)">—</span>'; } }
+    ], PARTICAO_OFS_ROWS, renderConfigRecursosBody);
+    var ocupacao = renderStaticTable([
       { key: 'deposito', label: 'Depósito (SAP)' },
       { key: 'descricao', label: 'Descrição' }
     ], OCUPACAO_MAXIMA_ROWS, renderConfigRecursosBody);
+    return '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Partição de OFs</h1></div>' + particao +
+      '<div class="section-head" style="padding:28px 14px 0;"><h1 style="font-size:13px;">Ocupação Máxima</h1></div>' + ocupacao;
   }
 
   var CONFIG_REC_TABS = [
