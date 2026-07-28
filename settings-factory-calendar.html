@@ -984,6 +984,37 @@
   .field select.filter-select { height: auto; padding: 7px 9px; }
   .field-row { display: flex; gap: 10px; }
   .field-row .field { flex: 1; }
+  .outline-field {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    padding: 8px 10px;
+    background: var(--surface);
+  }
+  .outline-field label {
+    position: absolute;
+    top: -8px;
+    left: 9px;
+    background: var(--surface);
+    padding: 0 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .outline-field input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 13px;
+    color: var(--text-primary);
+    width: 60px;
+  }
+  .outline-field .suffix { font-size: 10.5px; color: var(--text-muted); white-space: nowrap; }
+  .inatividade-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border-subtle); flex-wrap: wrap; }
+  .inatividade-row .switch-label { font-size: 12.5px; color: var(--text-primary); min-width: 160px; }
   .num-stepper-field {
     position: relative;
     display: flex;
@@ -1302,7 +1333,9 @@
     lock: '<rect x="4" y="11" width="16" height="10" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
     star: '<path d="M12 2.5l2.9 6.26L22 9.77l-5 4.87 1.18 6.88L12 18.27l-6.18 3.25L7 14.64 2 9.77l7.1-1.01z"/>',
     recycle: '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
-    chevronDown: '<path d="M6 9l6 6 6-6"/>'
+    chevronDown: '<path d="M6 9l6 6 6-6"/>',
+    list: '<path d="M9 6h12M9 12h12M9 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
+    copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>'
   };
 
   function svg(name, extra) {
@@ -3070,40 +3103,130 @@
     { workcenter: 'POT001', categoria: 'Lista Standard', consumos: true, sources: '—', lookbehind: 0 }
   ];
 
+  var INTERVALO_OPTIONS = ['Dias úteis', 'Semanal', 'Quinzenal'];
+  var inatividadeToleranciaProducao = 10;
+  var INATIVIDADE_FECHO_TABS = ['Embalagem', 'Semanais', 'Outros', 'Kanbans'];
+  var INATIVIDADE_FECHO_CONFIG = {
+    Embalagem: { quantidadeProduzida: true, ovInexistente: true, semProducao: { ativo: true, intervalo: 'Dias úteis', dias: 300 }, aposProducao: { ativo: true, intervalo: 'Dias úteis', dias: 300 } },
+    Semanais: { quantidadeProduzida: false, semProducao: { ativo: true, intervalo: 'Semanal' }, aposProducao: { ativo: true, intervalo: 'Semanal' } },
+    Outros: { quantidadeProduzida: true, semProducao: { ativo: true, intervalo: 'Quinzenal' }, aposProducao: { ativo: true, intervalo: 'Quinzenal' } },
+    Kanbans: { quantidadeProduzida: true, semProducao: { ativo: true, intervalo: 'Semanal' }, aposProducao: { ativo: true, intervalo: 'Semanal' } }
+  };
+  var inatividadeFechoState = { tab: 'Embalagem' };
+
+  function switchRow(label, checked, dataAttr, extra) {
+    return '<div class="inatividade-row"><div class="switch' + (checked ? ' on' : '') + '" data-inat-switch="' + dataAttr + '"><div class="thumb"></div></div>' +
+      '<span class="switch-label">' + label + '</span>' + (extra || '') + '</div>';
+  }
+
+  function intervaloField(key, cfg) {
+    if (!cfg) return '';
+    var select = '<select class="filter-select" data-inat-intervalo="' + key + '">' + INTERVALO_OPTIONS.map(function (o) {
+      return '<option' + (o === cfg.intervalo ? ' selected' : '') + '>' + o + '</option>';
+    }).join('') + '</select>';
+    var dias = cfg.intervalo === 'Dias úteis' ? '<div class="outline-field"><input type="number" data-inat-dias="' + key + '" value="' + cfg.dias + '"><span class="suffix">dias úteis</span></div>' : '';
+    return select + dias;
+  }
+
+  function renderInatividadeFecho() {
+    var cfg = INATIVIDADE_FECHO_CONFIG[inatividadeFechoState.tab];
+    var tolerancia = '<div style="padding:14px;"><div class="outline-field"><label>Tolerância de produção</label><input type="number" id="inatTolerancia" value="' + inatividadeToleranciaProducao + '"><span class="suffix">%</span></div></div>';
+    var intro = '<div style="padding:0 14px 12px;"><div style="font-weight:700;font-size:13px;">Formas de fecho por tab</div><div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Para cada tab de gestão de OFs, escolha que formas de fecho estão ativas e o intervalo de cada inatividade.</div></div>';
+    var tabsHtml = renderTabsBar('inatFechoTabs', INATIVIDADE_FECHO_TABS.map(function (t) { return { key: t, label: t }; }), inatividadeFechoState.tab, 'inatfechotab');
+    var rows = switchRow('Quantidade produzida', cfg.quantidadeProduzida, 'quantidadeProduzida') +
+      (cfg.ovInexistente != null ? switchRow('OV inexistente', cfg.ovInexistente, 'ovInexistente') : '') +
+      switchRow('Inatividade s/ produção', cfg.semProducao.ativo, 'semProducao.ativo', intervaloField('semProducao', cfg.semProducao)) +
+      switchRow('Inatividade após produção', cfg.aposProducao.ativo, 'aposProducao.ativo', intervaloField('aposProducao', cfg.aposProducao));
+    return tolerancia + intro + '<div class="content-card">' + tabsHtml + rows + '</div>';
+  }
+
+  function bindInatividadeFecho(root) {
+    var tolInput = root.querySelector('#inatTolerancia');
+    if (tolInput) tolInput.addEventListener('input', function (e) { inatividadeToleranciaProducao = parseInt(e.target.value, 10) || 0; });
+    root.querySelectorAll('[data-inatfechotab]').forEach(function (tabEl) {
+      tabEl.addEventListener('click', function () {
+        inatividadeFechoState.tab = tabEl.getAttribute('data-inatfechotab');
+        renderOfsConfiguracoesBody();
+      });
+    });
+    root.querySelectorAll('[data-inat-switch]').forEach(function (sw) {
+      sw.addEventListener('click', function () {
+        var path = sw.getAttribute('data-inat-switch').split('.');
+        var cfg = INATIVIDADE_FECHO_CONFIG[inatividadeFechoState.tab];
+        if (path.length === 1) cfg[path[0]] = !cfg[path[0]];
+        else cfg[path[0]][path[1]] = !cfg[path[0]][path[1]];
+        renderOfsConfiguracoesBody();
+      });
+    });
+    root.querySelectorAll('[data-inat-intervalo]').forEach(function (sel) {
+      sel.addEventListener('change', function (e) {
+        INATIVIDADE_FECHO_CONFIG[inatividadeFechoState.tab][sel.getAttribute('data-inat-intervalo')].intervalo = e.target.value;
+        renderOfsConfiguracoesBody();
+      });
+    });
+    root.querySelectorAll('[data-inat-dias]').forEach(function (inp) {
+      inp.addEventListener('input', function (e) {
+        INATIVIDADE_FECHO_CONFIG[inatividadeFechoState.tab][inp.getAttribute('data-inat-dias')].dias = parseInt(e.target.value, 10) || 0;
+      });
+    });
+  }
+
   function categoriaBadge(cat) {
     var cls = cat === 'Espelho Materiais' ? 'pill-warn' : cat === 'Sequenciamento' ? 'pill-good' : 'pill-neutral';
-    return '<span class="stat-pill ' + cls + '">' + cat + '</span>';
+    var icon = cat === 'Espelho Materiais' ? 'copy' : cat === 'Sequenciamento' ? 'sequence' : 'list';
+    return '<span class="stat-pill ' + cls + '" style="display:inline-flex;align-items:center;gap:4px;">' + svg(icon, 'width="11" height="11"') + cat + '</span>';
+  }
+
+  function frequenciaPill() {
+    return '<span class="stat-pill" style="background:var(--brand-accent);color:#fff;display:inline-flex;align-items:center;gap:4px;">Semanal' + svg('chevronDown', 'width="10" height="10"') + '</span>';
+  }
+
+  function lookbehindCell(r) {
+    if (r.lookbehind == null) return '<span style="color:var(--text-muted)">—</span>';
+    return '<span class="stat-pill pill-neutral" style="display:inline-flex;align-items:center;gap:3px;">' + svg('refresh', 'width="10" height="10"') + r.lookbehind + '</span>';
+  }
+
+  function sourcesCell(r) {
+    if (r.sources === '—') return '<span style="color:var(--text-muted)">—</span>';
+    return '<span class="stat-pill pill-neutral">' + r.sources + '</span>';
   }
 
   function ofsConfiguracoesPageTemplate() {
     var tabsHtml = '<div class="prod-tabs"><div class="prod-tab' + (ofsConfigState.tab === 'autoGeracao' ? ' active' : '') + '" data-ofsconfigtab="autoGeracao">Auto-Geração</div><div class="prod-tab' + (ofsConfigState.tab === 'inatividade' ? ' active' : '') + '" data-ofsconfigtab="inatividade">Inatividade de Fecho</div></div>';
     var body;
     if (ofsConfigState.tab === 'autoGeracao') {
-      body = '<div class="prod-toolbar"><div class="toolbar-spacer"></div><button class="btn btn-primary" data-msg="Regra adicionada (protótipo)">Adicionar</button></div>' +
-        '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Centro de Trabalho</th><th>Categoria</th><th>Frequência</th><th>Consumos Permitidos</th><th>Sources</th><th>Lookbehind</th></tr></thead><tbody>' +
+      body = '<div class="prod-toolbar"><div class="toolbar-spacer"></div><button class="btn btn-primary" data-msg="Regra adicionada (protótipo)">' + svg('plus', 'width="14" height="14"') + ' Adicionar</button></div>' +
+        '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Centro de Trabalho</th><th>Categoria</th><th>Frequência</th><th>Consumos Permitidos</th><th>Sources</th><th>Lookbehind</th><th>Ações</th></tr></thead><tbody>' +
         OFS_CONFIG_ROWS.map(function (r) {
-          return '<tr><td>' + r.workcenter + '</td><td>' + categoriaBadge(r.categoria) + '</td><td class="prod-cell"><span class="chip-filter active" style="cursor:default;">Semanal</span></td>' +
+          return '<tr><td>' + r.workcenter + '</td><td>' + categoriaBadge(r.categoria) + '</td><td class="prod-cell">' + frequenciaPill() + '</td>' +
             '<td class="prod-cell"><span class="stat-pill ' + (r.consumos ? 'pill-good' : 'pill-neutral') + '">' + (r.consumos ? 'Sim' : 'Não') + '</span></td>' +
-            '<td class="prod-cell">' + r.sources + '</td><td class="prod-cell">' + (r.lookbehind == null ? '—' : r.lookbehind) + '</td></tr>';
+            '<td class="prod-cell">' + sourcesCell(r) + '</td><td class="prod-cell">' + lookbehindCell(r) + '</td>' +
+            '<td class="prod-cell">' + protoActions() + '</td></tr>';
         }).join('') + '</tbody></table></div>';
     } else {
-      body = '<div class="empty-state">Sem regras de inatividade de fecho transcritas neste protótipo.</div>';
+      body = renderInatividadeFecho();
     }
     return '<div class="content-card"><div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:15px;">Configuração de OFs</h1><p style="font-size:12px;color:var(--text-secondary);margin:4px 0 0;">Define o ciclo de vida das OFs por centro de trabalho — geração automática e inatividade de fecho.</p></div>' + tabsHtml + body + '</div>';
+  }
+
+  function renderOfsConfiguracoesBody() {
+    var main = document.getElementById('mainContent');
+    main.innerHTML = '<div class="section-page">' + ofsConfiguracoesPageTemplate() + '</div>';
+    bindOfsConfiguracoesControls();
   }
 
   function bindOfsConfiguracoesControls() {
     document.querySelectorAll('[data-ofsconfigtab]').forEach(function (tabEl) {
       tabEl.addEventListener('click', function () {
         ofsConfigState.tab = tabEl.getAttribute('data-ofsconfigtab');
-        var main = document.getElementById('mainContent');
-        main.innerHTML = '<div class="section-page">' + ofsConfiguracoesPageTemplate() + '</div>';
-        bindOfsConfiguracoesControls();
+        renderOfsConfiguracoesBody();
       });
     });
     document.querySelectorAll('.btn[data-msg]').forEach(function (btn) {
       btn.addEventListener('click', function () { showToast(btn.getAttribute('data-msg')); });
     });
+    if (ofsConfigState.tab === 'autoGeracao') bindProtoActions(document.getElementById('mainContent'));
+    if (ofsConfigState.tab === 'inatividade') bindInatividadeFecho(document.getElementById('mainContent'));
   }
 
   /* ==================================================================
