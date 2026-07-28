@@ -4903,7 +4903,7 @@
       var header = '<div class="prod-toolbar turno-grupo-row" data-turno-maq-toggle="' + grupo + '" style="cursor:pointer;">' +
         '<span class="turno-grupo-icon">' + svg('factory', 'width="14" height="14"') + '</span>' +
         '<span style="font-weight:700;flex:1;">' + grupo + '</span>' +
-        '<span class="stat-pill ' + (nExc > 0 ? 'pill-bad' : 'pill-neutral') + '">' + nExc + ' exceção' + (nExc === 1 ? '' : 'ões') + '</span>' +
+        '<span class="stat-pill ' + (nExc > 0 ? 'pill-bad' : 'pill-neutral') + '">' + nExc + ' ' + (nExc === 1 ? 'exceção' : 'exceções') + '</span>' +
         '<span class="stat-pill pill-neutral">' + nMaq + ' máquinas</span>' +
         '<span class="turno-grupo-chevron' + (expanded ? ' open' : '') + '">' + svg('chevronDown', 'width="16" height="16"') + '</span>' +
         '</div>';
@@ -4933,7 +4933,7 @@
       var header = '<div class="prod-toolbar turno-grupo-row" data-turno-exc-toggle="' + grupo + '" style="cursor:pointer;">' +
         '<span class="turno-grupo-icon">' + svg('factory', 'width="14" height="14"') + '</span>' +
         '<span style="font-weight:700;flex:1;">' + grupo + '</span>' +
-        '<span class="stat-pill ' + (nExc > 0 ? 'pill-bad' : 'pill-neutral') + '">' + nExc + ' exceção' + (nExc === 1 ? '' : 'ões') + '</span>' +
+        '<span class="stat-pill ' + (nExc > 0 ? 'pill-bad' : 'pill-neutral') + '">' + nExc + ' ' + (nExc === 1 ? 'exceção' : 'exceções') + '</span>' +
         '<span class="turno-grupo-chevron' + (expanded ? ' open' : '') + '">' + svg('chevronDown', 'width="16" height="16"') + '</span>' +
         '</div>';
       return header + (expanded ? renderTurnosExcecoesGrupoTable(grupo) : '');
@@ -5116,7 +5116,7 @@
     { key: 'prioridades', label: 'Prioridades' },
     { key: 'restricoes', label: 'Restrições' },
     { key: 'mapeamentoDepositos', label: 'Mapeamento de Depósitos' },
-    { key: 'ocupacaoMaxima', label: 'Ocupação Máxima' },
+    { key: 'ocupacaoMaxima', label: 'Parametrizações' },
     { key: 'configMaquina', label: 'Configurações de Máquina' }
   ];
   var configRecState = { tab: 'setups' };
