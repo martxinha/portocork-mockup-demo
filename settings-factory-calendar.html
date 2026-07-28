@@ -1571,7 +1571,7 @@
 
   function calendarPageTemplate(noBreadcrumb) {
     return '' +
-      (noBreadcrumb ? '' : '<div class="breadcrumb"><span class="crumb-current">Calendário da Fábrica</span></div>') +
+      '' +
       '<div class="content-card">' +
         '<div class="calendar-toolbar">' +
           '<div class="calendar-nav">' +
@@ -2137,9 +2137,8 @@
   var HOME_ALERTS = [
     { label: 'Encomendas em Atraso', value: '18', tone: 'bad', icon: 'orders', linkTo: 'encomendasPlanear' },
     { label: 'Artigos sem Lavação Definida', value: '42', tone: 'warn', icon: 'ofs' },
-    { label: 'Objetivos sem Calibre Definido', value: '9', tone: 'warn', icon: 'decision' },
-    { label: 'Plano de Tratamento em Falha', value: '1250 un.', tone: 'warn', icon: 'warn' },
-    { label: 'LT de Atraso · Clientes Premium', value: '2.4 dias', tone: 'warn', icon: 'truck' }
+    { label: 'LT de Atraso · Clientes Premium', value: '2.4 dias', tone: 'warn', icon: 'truck' },
+    { label: 'LT de Atraso · STOs', value: '4.1 dias', tone: 'warn', icon: 'calmonth', linkTo: 'stos' }
   ];
 
   var STOCKS_OBJETIVOS = [
@@ -2349,7 +2348,7 @@
   var encDocClickHandler = null;
 
   function encomendasPageTemplate() {
-    return '<div class="breadcrumb"><span class="crumb-current">Encomendas por Planear</span></div>' +
+    return '' +
       '<div class="content-card" id="encCard"></div>';
   }
 
@@ -2530,7 +2529,13 @@
     { key: 'status', label: 'Status', center: true, render: function (r) { return '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + (r.statusOk ? 'var(--evt-closure)' : 'var(--evt-stop)') + ';"></span>'; } },
     { key: 'processoAtual', label: 'Processos Atuais', center: true, render: function (r) { return '<span class="tag-pill tag-shared" style="text-transform:none;">' + r.processoAtual + '</span>'; } },
     { key: 'txtPr', label: 'Txt Pr...', render: function (r) { return r.txtPr || '<span style="color:var(--text-muted)">—</span>'; } },
-    { key: 'amPs', label: 'AM/PS', center: true, render: function (r) { return r.amPs.map(function (a) { return '<span class="stat-pill pill-neutral" style="margin:0 2px;">' + a + '</span>'; }).join(''); } }
+    { key: 'historicoDatas', label: 'Histórico de Datas (LT)', center: true, render: function (r) {
+      var h = HISTORICO_DATAS[r.ov];
+      if (!h || !h.length) return '<span style="color:var(--text-muted)">—</span>';
+      var maxLt = Math.max.apply(null, h.map(function (x) { return x.ltAtraso; }));
+      var tone = maxLt > 0 ? 'pill-bad' : maxLt < 0 ? 'pill-good' : 'pill-neutral';
+      return '<span class="stat-pill ' + tone + '">' + (maxLt > 0 ? '+' : '') + fmt2(maxLt) + ' d</span>';
+    } }
   ];
   var carteiraColVisible = {};
   CARTEIRA_COLUMNS.forEach(function (c) { carteiraColVisible[c.key] = true; });
@@ -2558,6 +2563,7 @@
     var visibleCols = CARTEIRA_COLUMNS.filter(function (c) { return carteiraColVisible[c.key]; });
 
     var toolbar1 = '<div class="prod-toolbar">' +
+      '<button class="icon-inline-btn" id="carteiraInfo" title="Carteira completa de encomendas confirmadas — pesquisa, filtros por calibre, colunas configuráveis e histórico de datas por linha">ⓘ</button>' +
       '<input type="text" class="filter-select" id="carteiraBusca" placeholder="Pesquisar..." style="min-width:220px;" value="' + escapeHtml(carteiraState.busca) + '">' +
       '<button class="btn" id="carteiraLimparFiltros">' + svg('warn', 'width="13" height="13"') + ' Limpar Filtros</button>' +
       '<div class="switch-row"><div class="switch' + (carteiraState.acumularFiltros ? ' on' : '') + '" id="carteiraAcumular"><div class="thumb"></div></div>Acumular filtros</div>' +
@@ -2607,6 +2613,7 @@
 
     card.innerHTML = toolbar1 + toolbar2 + table + footer;
 
+    document.getElementById('carteiraInfo').addEventListener('click', function () { showToast('Carteira completa de encomendas confirmadas, com filtros, colunas configuráveis e histórico de datas (protótipo)'); });
     document.getElementById('carteiraBusca').addEventListener('input', function (e) { carteiraState.busca = e.target.value; renderCarteiraBody(); });
     document.getElementById('carteiraLimparFiltros').addEventListener('click', function () {
       carteiraState.busca = '';
@@ -2699,7 +2706,6 @@
 
   function ofsCriarPageTemplate() {
     return '' +
-      '<div class="breadcrumb"><span class="crumb-muted">Gestão de OFs</span><span class="crumb-sep">/</span><span class="crumb-current">Criar</span></div>' +
       '<div class="content-card">' +
         '<div class="of-header">' +
           '<h1 style="font-size:15px;margin:0;">Abrir OFs</h1>' +
@@ -2749,7 +2755,7 @@
   ];
 
   function ofsPorLiberarPageTemplate() {
-    return '<div class="breadcrumb"><span class="crumb-muted">Gestão de OFs</span><span class="crumb-sep">/</span><span class="crumb-current">OFs por Liberar (' + OFS_POR_LIBERAR_ROWS.length + ' OFs)</span></div><div class="content-card" id="ofsPorLiberarCard"></div>';
+    return '<div class="content-card" id="ofsPorLiberarCard"></div>';
   }
 
   function bindOfsPorLiberarControls() { renderOfsPorLiberarBody(); }
@@ -2788,7 +2794,7 @@
   var ofsSemanaisState = { busca: '', weekMonday: getWeekMonday(new Date()) };
 
   function ofsSemanaisPageTemplate() {
-    return '<div class="breadcrumb"><span class="crumb-muted">Gestão de OFs</span><span class="crumb-sep">/</span><span class="crumb-current">OFs Semanais</span></div><div class="content-card" id="ofsSemCard"></div>';
+    return '<div class="content-card" id="ofsSemCard"></div>';
   }
 
   function bindOfsSemanaisControls() { renderOfsSemanaisBody(); }
@@ -2899,7 +2905,7 @@
   }
 
   function ofsEliminarPageTemplate() {
-    return '<div class="breadcrumb"><span class="crumb-muted">Gestão de OFs</span><span class="crumb-sep">/</span><span class="crumb-current">Eliminar</span></div><div class="content-card" id="eliminarCard"></div>';
+    return '<div class="content-card" id="eliminarCard"></div>';
   }
 
   function bindOfsEliminarControls() { renderEliminarBody(); }
@@ -2937,8 +2943,7 @@
       LISTA_STANDARD_ROWS.map(function (r) {
         return '<tr><td>' + r.workcenter + '</td><td>' + r.material + '</td><td>' + r.descricao + '</td><td><span class="stat-pill pill-neutral" style="font-size:9px;">VP 1</span> ' + r.workcenter + '_' + r.descricao + '</td><td class="prod-cell">' + r.qtd + '</td></tr>';
       }).join('') + '</tbody></table></div>';
-    return '<div class="breadcrumb"><span class="crumb-muted">Gestão de OFs</span><span class="crumb-sep">/</span><span class="crumb-current">Lista Standard</span></div>' +
-      '<div class="content-card"><div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:15px;">Lista Standard de OFs</h1></div>' + toolbar + table + '</div>';
+    return '<div class="content-card"><div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:15px;">Lista Standard de OFs</h1></div>' + toolbar + table + '</div>';
   }
 
   function bindOfsListaStandardControls() {
@@ -2987,8 +2992,7 @@
     } else {
       body = '<div class="empty-state">Sem regras de inatividade de fecho transcritas neste protótipo.</div>';
     }
-    return '<div class="breadcrumb"><span class="crumb-muted">Gestão de OFs</span><span class="crumb-sep">/</span><span class="crumb-current">Configurações</span></div>' +
-      '<div class="content-card"><div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:15px;">Configuração de OFs</h1><p style="font-size:12px;color:var(--text-secondary);margin:4px 0 0;">Define o ciclo de vida das OFs por workcenter — geração automática e inatividade de fecho.</p></div>' + tabsHtml + body + '</div>';
+    return '<div class="content-card"><div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:15px;">Configuração de OFs</h1><p style="font-size:12px;color:var(--text-secondary);margin:4px 0 0;">Define o ciclo de vida das OFs por workcenter — geração automática e inatividade de fecho.</p></div>' + tabsHtml + body + '</div>';
   }
 
   function bindOfsConfiguracoesControls() {
@@ -3030,8 +3034,7 @@
   ];
 
   function stosPageTemplate() {
-    var alertas = STOS_ROWS.filter(function (r) { return r.estado === 'Pendente' || r.estado === 'Alteração'; }).length;
-    return '<div class="breadcrumb"><span class="crumb-current">STOs (' + alertas + ' Alertas)</span></div><div class="content-card" id="stosCard"></div>';
+    return '<div class="content-card" id="stosCard"></div>';
   }
 
   function bindStosControls() { renderStosBody(); }
@@ -3039,10 +3042,11 @@
   function renderStosBody() {
     var card = document.getElementById('stosCard');
     var rows = STOS_ROWS.filter(function (r) { return stosState.estado === 'Todos' || r.estado === stosState.estado; });
+    var alertas = STOS_ROWS.filter(function (r) { return r.estado === 'Pendente' || r.estado === 'Alteração'; }).length;
     var chips = ['Todos', 'Pendente', 'Alteração', 'Expedido'].map(function (e) {
       return '<div class="chip-filter' + (e === stosState.estado ? ' active' : '') + '" data-estado="' + e + '">' + e + '</div>';
     }).join('');
-    var toolbar = '<div class="prod-toolbar"><div class="chip-group">' + chips + '</div><div class="toolbar-spacer"></div><button class="btn btn-primary" id="stosExportar">' + svg('download', 'width="14" height="14"') + ' EXPORTAR</button></div>';
+    var toolbar = '<div class="prod-toolbar"><div class="stat-inline">' + alertas + ' Alertas</div><div class="chip-group">' + chips + '</div><div class="toolbar-spacer"></div><button class="btn btn-primary" id="stosExportar">' + svg('download', 'width="14" height="14"') + ' EXPORTAR</button></div>';
     var rowsHtml = rows.map(function (r) {
       var isAlteracao = r.estado === 'Alteração';
       return '<tr' + (isAlteracao ? ' style="background:var(--evt-stop-bg);"' : '') + '><td class="prod-cell">' + svg('orders', 'width="14" height="14" style="color:var(--brand-primary)"') + '</td><td>' + r.grupo + '</td><td class="prod-cell">' + r.centroFornecedor + '</td><td>' + r.materialProducao + '</td><td>' + r.textoBreve + '</td>' +
@@ -3082,20 +3086,21 @@
      STOs > Perfil de Fornecedores
      ================================================================== */
   var PERFIL_FORNECEDORES_ROWS = [
-    { fornecedor: 'Amorim Lamas', contacto: 'sto@amorimlamas.pt', leadTimeAssumido: 1, tipoStock: 'Pronto' },
-    { fornecedor: 'VL', contacto: 'sto@vl.pt', leadTimeAssumido: 1, tipoStock: 'Aproximado' },
-    { fornecedor: 'Cortiças Robinson, Lda.', contacto: 'sto@robinson.pt', leadTimeAssumido: 2, tipoStock: 'Pronto' },
-    { fornecedor: 'J. Guimarães & Filhos', contacto: 'sto@jguimaraes.pt', leadTimeAssumido: 3, tipoStock: 'Aproximado' }
+    { fornecedor: 'Amorim Lamas', contacto: 'sto@amorimlamas.pt', leadTimeAssumido: 1, ltMedioCumprimento: 0, tipoStock: 'Pronto' },
+    { fornecedor: 'VL', contacto: 'sto@vl.pt', leadTimeAssumido: 1, ltMedioCumprimento: 3, tipoStock: 'Aproximado' },
+    { fornecedor: 'Cortiças Robinson, Lda.', contacto: 'sto@robinson.pt', leadTimeAssumido: 2, ltMedioCumprimento: 1, tipoStock: 'Pronto' },
+    { fornecedor: 'J. Guimarães & Filhos', contacto: 'sto@jguimaraes.pt', leadTimeAssumido: 3, ltMedioCumprimento: 4, tipoStock: 'Aproximado' }
   ];
   var PERFIL_FORNECEDORES_FIELDS = [
     { key: 'fornecedor', label: 'Fornecedor', type: 'text' },
     { key: 'contacto', label: 'Contacto', type: 'text' },
     { key: 'leadTimeAssumido', label: 'Lead Time Assumido (dias)', type: 'number' },
+    { key: 'ltMedioCumprimento', label: 'LT Médio de Cumprimento (dias)', type: 'number' },
     { key: 'tipoStock', label: 'Tipo de Stock', type: 'select', options: ['Pronto', 'Aproximado'] }
   ];
 
   function perfilFornecedoresPageTemplate() {
-    return '<div class="breadcrumb"><span class="crumb-muted">STOs</span><span class="crumb-sep">/</span><span class="crumb-current">Perfil de Fornecedores</span></div><div class="content-card" id="perfilFornecedoresCard"></div>';
+    return '<div class="content-card" id="perfilFornecedoresCard"></div>';
   }
 
   function bindPerfilFornecedoresControls() { renderPerfilFornecedoresBody(); }
@@ -3104,11 +3109,13 @@
     var card = document.getElementById('perfilFornecedoresCard');
     var toolbar = '<div class="prod-toolbar"><button class="icon-inline-btn" title="Indica se o stock deste fornecedor é confirmado (Pronto) ou uma estimativa (Aproximado), para dar mais confiança ao planeamento">ⓘ</button><div class="stat-inline">Perfil de fiabilidade de stock por fornecedor (STO)</div></div>';
     var rowsHtml = PERFIL_FORNECEDORES_ROWS.map(function (r, idx) {
+      var ltTone = r.ltMedioCumprimento > 2 ? 'pill-bad' : r.ltMedioCumprimento > 0 ? 'pill-warn' : 'pill-good';
       return '<tr><td>' + r.fornecedor + '</td><td>' + r.contacto + '</td><td class="prod-cell">' + r.leadTimeAssumido + '</td>' +
+        '<td class="prod-cell"><span class="stat-pill ' + ltTone + '">' + (r.ltMedioCumprimento > 0 ? '+' : '') + r.ltMedioCumprimento + ' d</span></td>' +
         '<td class="prod-cell"><span class="stat-pill ' + (r.tipoStock === 'Pronto' ? 'pill-good' : 'pill-warn') + '">' + r.tipoStock + '</span></td>' +
         '<td class="prod-cell"><button class="icon-inline-btn" data-perfilfornecedor-edit-idx="' + idx + '" title="Editar">' + svg('pencil', 'width="14" height="14"') + '</button></td></tr>';
     }).join('');
-    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Fornecedor</th><th>Contacto</th><th>Lead Time Assumido (dias)</th><th>Tipo de Stock</th><th>Ações</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>';
+    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Fornecedor</th><th>Contacto</th><th>Lead Time Assumido (dias)</th><th>LT Médio de Cumprimento</th><th>Tipo de Stock</th><th>Ações</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>';
     card.innerHTML = toolbar + table;
     card.querySelectorAll('[data-perfilfornecedor-edit-idx]').forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -3194,7 +3201,7 @@
   }
 
   function cargaCapacidadePageTemplate() {
-    return '<div class="breadcrumb"><span class="crumb-muted">Macro Planeamento</span><span class="crumb-sep">/</span><span class="crumb-current">Carga Capacidade</span></div><div class="content-card" id="capCard"></div>';
+    return '<div class="content-card" id="capCard"></div>';
   }
 
   function bindCargaCapacidadeControls() { renderCapBody(); }
@@ -3505,7 +3512,7 @@
   var simState = { ov: null, dias: 3, resultado: null };
 
   function simulacaoPageTemplate() {
-    return '<div class="breadcrumb"><span class="crumb-muted">Macro Planeamento</span><span class="crumb-sep">/</span><span class="crumb-current">Simulação</span></div><div class="content-card" id="simCard"></div>';
+    return '<div class="content-card" id="simCard"></div>';
   }
 
   function bindSimulacaoControls() { renderSimBody(); }
@@ -3631,7 +3638,7 @@
   }
 
   function sequenciamentoPageTemplate() {
-    return '<div class="breadcrumb"><span class="crumb-current">Sequenciamento</span></div><div class="content-card" id="seqCard"></div>';
+    return '<div class="content-card" id="seqCard"></div>';
   }
 
   function bindSequenciamentoControls() { renderSeqBody(); }
@@ -4050,8 +4057,7 @@
     var st = maquinasFlowState[flowKey];
     if (!st.etapa) st.etapa = maquinasEtapas(flowKey)[0];
     var etapas = maquinasEtapas(flowKey).map(function (e) { return { key: e, label: e }; });
-    return '<div class="breadcrumb"><span class="crumb-muted">Máquinas</span><span class="crumb-sep">/</span><span class="crumb-current">' + MAQUINAS_FLOW_LABELS[flowKey] + '</span></div>' +
-      renderTabsBar('maquinasFlowTabs', etapas, st.etapa, 'etapa') +
+    return renderTabsBar('maquinasFlowTabs', etapas, st.etapa, 'etapa') +
       '<div class="content-card" id="maquinasFlowBody"></div>';
   }
 
@@ -4522,8 +4528,7 @@
   function configOperacaoPageTemplate() {
     var tabs = visibleTabs(CONFIG_OP_TABS);
     if (!tabs.some(function (t) { return t.key === configOpState.tab; })) configOpState.tab = tabs[0].key;
-    return '<div class="breadcrumb"><span class="crumb-muted">Configurações</span><span class="crumb-sep">/</span><span class="crumb-current">Operação</span></div>' +
-      '<div class="content-card"><div class="prod-tabs" id="configOpTabs">' + tabs.map(function (t) {
+    return '<div class="content-card"><div class="prod-tabs" id="configOpTabs">' + tabs.map(function (t) {
         return '<div class="prod-tab' + (t.key === configOpState.tab ? ' active' : '') + '" data-configoptab="' + t.key + '">' + t.label + '</div>';
       }).join('') + '</div><div id="configOpBody"></div></div>';
   }
@@ -5034,8 +5039,7 @@
   }
 
   function configRecursosPageTemplate() {
-    return '<div class="breadcrumb"><span class="crumb-muted">Configurações</span><span class="crumb-sep">/</span><span class="crumb-current">Recursos</span></div>' +
-      '<div class="content-card"><div class="prod-tabs" id="configRecTabs">' + CONFIG_REC_TABS.map(function (t) {
+    return '<div class="content-card"><div class="prod-tabs" id="configRecTabs">' + CONFIG_REC_TABS.map(function (t) {
         return '<div class="prod-tab' + (t.key === configRecState.tab ? ' active' : '') + '" data-configrectab="' + t.key + '">' + t.label + '</div>';
       }).join('') + '</div><div id="configRecBody"></div></div>';
   }
@@ -5249,8 +5253,7 @@
   function configGeraisPageTemplate() {
     var tabs = visibleTabs(CONFIG_GERAIS_TABS);
     if (!tabs.some(function (t) { return t.key === configGeraisState.tab; })) configGeraisState.tab = tabs[0].key;
-    return '<div class="breadcrumb"><span class="crumb-muted">Configurações</span><span class="crumb-sep">/</span><span class="crumb-current">Gerais</span></div>' +
-      '<div class="content-card"><div class="prod-tabs" id="configGeraisTabs">' + tabs.map(function (t) {
+    return '<div class="content-card"><div class="prod-tabs" id="configGeraisTabs">' + tabs.map(function (t) {
         return '<div class="prod-tab' + (t.key === configGeraisState.tab ? ' active' : '') + '" data-configgeraistab="' + t.key + '">' + t.label + '</div>';
       }).join('') + '</div><div id="configGeraisBody"></div></div>';
   }
