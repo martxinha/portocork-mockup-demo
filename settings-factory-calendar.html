@@ -4654,7 +4654,7 @@
     var rows = LEAD_TIMES_SETORES.filter(function (r) { return !r.flow || r.flow === state.globalFlow; });
     var setores = renderStaticTable([{ key: 'atual', label: 'Setor Atual' }, { key: 'seguinte', label: 'Setor Seguinte' }, { key: 'dias', label: 'Lead Time (dias)', center: true }, { key: 'nota', label: 'Nota', render: function (r) { return r.nota || '<span style="color:var(--text-muted)">—</span>'; } }], rows, renderConfigRecursosBody);
     return '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Lead Times entre Processos</h1></div>' + setores +
-      renderTemposEstabilizacaoSection(renderConfigRecursosBody);
+      (state.globalFlow === 'distribuicao' ? renderTemposEstabilizacaoSection(renderConfigRecursosBody) : '');
   }
 
   var MULTIPLOS_PALETE = [
