@@ -1310,6 +1310,7 @@
     stos: 'STOs',
     perfilFornecedores: 'Perfil de Fornecedores',
     producaoAcompanhamento: 'Acompanhamento',
+    alertas: 'Alertas',
     maquinas: 'Máquinas',
     configOperacao: 'Operação',
     configRecursos: 'Recursos',
@@ -1350,6 +1351,7 @@
         { key: 'perfilFornecedores', title: 'Perfil de Fornecedores' }
       ]
     },
+    { key: 'alertas', icon: 'alerts', title: 'Alertas' },
     { key: 'maquinas', icon: 'factory', title: 'Máquinas' },
     {
       icon: 'gear',
@@ -4114,6 +4116,58 @@
       '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Nome MES</th><th>Máquina</th><th>Centro de Trabalho</th><th>Cadência (Mil/h)</th><th>OEE (%)</th><th>Ações</th></tr></thead><tbody>' + (rowsHtml || '<tr><td colspan="6"><div class="empty-state">Sem máquinas para este filtro.</div></td></tr>') + '</tbody></table></div>';
   }
 
+  /* ==================================================================
+     Alertas
+     ================================================================== */
+  var ALERTAS_ROWS = [
+    { ov: '1420093102', componente: '60024958', material: '60024958', data: '2026-08-24', erro: 'Artigo sem Componente de Marcação.' },
+    { ov: '1420093102', componente: '60024958', material: '60024958', data: '2026-09-08', erro: 'Artigo sem Componente de Marcação.' },
+    { ov: '1420093102', componente: '60024958', material: '60024958', data: '2026-09-18', erro: 'Artigo sem Componente de Marcação.' },
+    { ov: '1420093102', componente: '60024958', material: '60024958', data: '2026-10-08', erro: 'Artigo sem Componente de Marcação.' },
+    { ov: '1420093102', componente: '60024958', material: '60024958', data: '2026-10-19', erro: 'Artigo sem Componente de Marcação.' },
+    { ov: '1420093102', componente: '60024958', material: '60024958', data: '2026-11-06', erro: 'Artigo sem Componente de Marcação.' },
+    { ov: '1420093102', componente: '60024958', material: '60024958', data: '2026-11-19', erro: 'Artigo sem Componente de Marcação.' },
+    { ov: '1420093102', componente: '60024958', material: '60024958', data: '2026-12-07', erro: 'Artigo sem Componente de Marcação.' },
+    { ov: '1420093102', componente: '60024958', material: '60024958', data: '2026-12-16', erro: 'Artigo sem Componente de Marcação.' },
+    { ov: '1420093205', componente: '60019468', material: '60019468', data: '2026-10-19', erro: 'Artigo sem Componente de Marcação.' }
+  ];
+  var ALERTAS_TOTAL = 686;
+  var alertasState = { busca: '' };
+
+  function alertasPageTemplate() {
+    return '<div class="content-card" id="alertasCard"></div>';
+  }
+
+  function bindAlertasControls() { renderAlertasBody(); }
+
+  function renderAlertasBody() {
+    var card = document.getElementById('alertasCard');
+    var rows = ALERTAS_ROWS.filter(function (r) {
+      if (!alertasState.busca) return true;
+      var q = alertasState.busca.toLowerCase();
+      return (r.ov + r.componente + r.material + r.erro).toLowerCase().indexOf(q) !== -1;
+    });
+    var toolbar = '<div class="prod-toolbar">' +
+      '<input type="text" class="filter-select" id="alertasBusca" placeholder="Pesquisar..." style="min-width:260px;" value="' + escapeHtml(alertasState.busca) + '">' +
+      '</div>';
+    var rowsHtml = rows.map(function (r) {
+      return '<tr><td><a style="color:var(--brand-primary);font-weight:600;">' + r.ov + '</a></td><td>' + r.componente + '</td><td>' + r.material + '</td><td>' + r.data + '</td><td>' + r.erro + '</td></tr>';
+    }).join('');
+    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>OV</th><th>Componente</th><th>Material</th><th>Data</th><th>Erro</th></tr></thead><tbody>' +
+      (rowsHtml || '<tr><td colspan="5"><div class="empty-state">Sem alertas.</div></td></tr>') + '</tbody></table></div>';
+    var footer = '<div class="table-footer">Linhas por página <select class="filter-select" style="min-width:60px" disabled><option>10</option></select><span class="toolbar-spacer"></span>1-' + rows.length + ' of ' + ALERTAS_TOTAL +
+      '<button class="icon-inline-btn" disabled title="Primeira página">«</button>' +
+      '<button class="icon-inline-btn" disabled title="Página anterior">‹</button>' +
+      '<button class="icon-inline-btn" id="alertasNext" title="Próxima página">›</button>' +
+      '<button class="icon-inline-btn" id="alertasLast" title="Última página">»</button>' +
+      '</div>';
+    card.innerHTML = toolbar + table + footer;
+    document.getElementById('alertasBusca').addEventListener('input', function (e) { alertasState.busca = e.target.value; renderAlertasBody(); });
+    var nextBtn = document.getElementById('alertasNext'), lastBtn = document.getElementById('alertasLast');
+    if (nextBtn) nextBtn.addEventListener('click', function () { showToast('Próxima página (protótipo)'); });
+    if (lastBtn) lastBtn.addEventListener('click', function () { showToast('Última página (protótipo)'); });
+  }
+
   function maquinasFlowPageTemplate(flowKey) {
     var st = maquinasFlowState[flowKey];
     if (!st.etapa) st.etapa = maquinasEtapas(flowKey)[0];
@@ -4305,17 +4359,14 @@
   function joinOrDash(arr) { return arr.length ? arr.join(', ') : '<span style="color:var(--text-muted)">—</span>'; }
 
   function renderLeadTimeRule() {
-    var rows = LEAD_TIME_RULES.map(function (r, idx) {
-      return '<div class="prod-toolbar" style="gap:16px;flex-wrap:wrap;">' +
-        '<div class="stat-inline">' + r.dias + ' dia(s) antes de ' + joinOrDash(r.processos) + '</div>' +
-        '<div style="font-size:11.5px;color:var(--text-secondary);">Clientes: ' + joinOrDash(r.clientes) + '</div>' +
-        '<div style="font-size:11.5px;color:var(--text-secondary);">Tratamentos: ' + joinOrDash(r.tratamentos) + '</div>' +
-        '<div class="toolbar-spacer"></div>' +
-        '<button class="icon-inline-btn" data-ltr-edit="' + idx + '" title="Editar">' + svg('pencil', 'width="14" height="14"') + '</button>' +
-        '<button class="icon-inline-btn" data-ltr-delete="' + idx + '" title="Eliminar">🗑</button>' +
-        '</div>';
-    }).join('') || '<div class="empty-state" style="margin:10px 14px;">Sem regras definidas.</div>';
-    return '<div id="leadTimeRuleSection"><div class="prod-toolbar"><div class="stat-inline">Lead Time entre processos, com exceções por cliente e tratamento</div><div class="toolbar-spacer"></div><button class="btn btn-primary" id="ltrNovaRegra">+ Nova Regra</button></div>' + rows + '</div>';
+    var rowsHtml = LEAD_TIME_RULES.map(function (r, idx) {
+      return '<tr><td class="prod-cell">' + r.dias + '</td><td>' + joinOrDash(r.processos) + '</td><td>' + joinOrDash(r.clientes) + '</td><td>' + joinOrDash(r.tratamentos) + '</td>' +
+        '<td class="prod-cell"><button class="icon-inline-btn" data-ltr-edit="' + idx + '" title="Editar">' + svg('pencil', 'width="14" height="14"') + '</button>' +
+        '<button class="icon-inline-btn" data-ltr-delete="' + idx + '" title="Eliminar">🗑</button></td></tr>';
+    }).join('') || '<tr><td colspan="5"><div class="empty-state">Sem regras definidas.</div></td></tr>';
+    var toolbar = '<div class="prod-toolbar"><div class="toolbar-spacer"></div><button class="btn btn-primary" id="ltrNovaRegra">+ Nova Regra</button></div>';
+    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Nº de Dias</th><th>Processo(s) Seguinte(s)</th><th>Clientes</th><th>Tratamentos</th><th>Ações</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>';
+    return toolbar + table;
   }
 
   var ltrModalState = null;
@@ -4350,7 +4401,7 @@
     document.getElementById('leadTimeRuleOverlay').classList.add('open');
   }
 
-  function renderTemposEstabilizacao() {
+  function renderLeadTimes() {
     var tempos = renderStaticTable([
       { key: 'tratamento', label: 'Tratamento' },
       { key: 'ciclo1', label: 'Ciclo 1' },
@@ -4365,7 +4416,8 @@
       { key: 'cliente', label: 'Cliente' },
       { key: 'horas', label: 'Estabilização (horas)', center: true }
     ], ESTABILIZACAO_CLIENTE_ROWS, renderConfigOperacaoBody);
-    return '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Tempos de Estabilização por Tratamento</h1></div>' + tempos +
+    return renderLeadTimeRule() +
+      '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Tempos de Estabilização por Tratamento</h1></div>' + tempos +
       '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Estabilização por Cliente (Exceções)</h1></div>' + clienteTable;
   }
 
@@ -4539,7 +4591,7 @@
     { key: 'aprovacaoContrato', label: '% Aprovação por Contrato' },
     { key: 'criteriosLiberacao', label: 'Critérios de Liberação de OFs' },
     { key: 'prioridadesPlaneamento', label: 'Prioridades de Planeamento' },
-    { key: 'temposEstabilizacao', label: 'Tempos de Estabilização', flow: 'distribuicao' },
+    { key: 'leadTimes', label: 'Lead Times', flow: 'distribuicao' },
     { key: 'multiplosPalete', label: 'Múltiplos de Palete' },
     { key: 'periodoCongelamento', label: 'Período de Congelamento' },
     { key: 'reposicaoStos', label: 'Reposição de STOs' }
@@ -4599,7 +4651,7 @@
     if (key === 'aprovacaoContrato') return renderAprovacaoContrato();
     if (key === 'criteriosLiberacao') return renderCriteriosLiberacao();
     if (key === 'prioridadesPlaneamento') return renderPrioridadesPlaneamento();
-    if (key === 'temposEstabilizacao') return renderTemposEstabilizacao();
+    if (key === 'leadTimes') return renderLeadTimes();
     if (key === 'multiplosPalete') return renderStaticTable(state.globalFlow === 'ndtech'
       ? [{ key: 'calibre', label: 'Calibre' }, { key: 'qtdPl', label: 'Qtd. por Palete', center: true }, { key: 'qtdLav', label: 'Qtd. por Lavação', center: true }, { key: 'qtdCarro', label: 'Qtd. por Carro', center: true }]
       : [{ key: 'calibre', label: 'Calibre' }, { key: 'qtdPl', label: 'Qtd. por Palete', center: true }], MULTIPLOS_PALETE, renderConfigOperacaoBody);
@@ -4683,7 +4735,7 @@
       }
     } else if (configOpState.tab === 'periodoCongelamento') {
       bindPeriodoCongelamento(body);
-    } else if (configOpState.tab === 'temposEstabilizacao') {
+    } else if (configOpState.tab === 'leadTimes') {
       var ltrAdd = body.querySelector('#ltrNovaRegra');
       if (ltrAdd) ltrAdd.addEventListener('click', function () { openLeadTimeRuleModal(null); });
       body.querySelectorAll('[data-ltr-edit]').forEach(function (btn) {
@@ -5521,6 +5573,9 @@
     } else if (state.section === 'sequenciamento') {
       main.innerHTML = '<div class="section-page">' + sequenciamentoPageTemplate() + '</div>';
       bindSequenciamentoControls();
+    } else if (state.section === 'alertas') {
+      main.innerHTML = '<div class="section-page">' + alertasPageTemplate() + '</div>';
+      bindAlertasControls();
     } else if (state.section === 'maquinas') {
       main.innerHTML = '<div class="section-page">' + maquinasFlowPageTemplate(state.globalFlow) + '</div>';
       bindMaquinasFlowControls(state.globalFlow);
