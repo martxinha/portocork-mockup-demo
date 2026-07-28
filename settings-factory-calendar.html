@@ -3931,32 +3931,29 @@
     { key: 'nomeMes', label: 'Nome MES', type: 'text' },
     { key: 'maquina', label: 'Máquina', type: 'text' },
     { key: 'centro', label: 'Centro de Trabalho', type: 'text' },
-    { key: 'uvLed', label: 'UV LED', type: 'checkbox' },
-    { key: 'uv', label: 'UV', type: 'checkbox' },
-    { key: 'uv2', label: 'UV 2', type: 'checkbox' },
     { key: 'cadencia', label: 'Cadência (Mil/h)', type: 'number' },
     { key: 'oee', label: 'OEE (%)', type: 'number' }
   ];
 
   var MAQUINAS_TINTA_ROWS = [
-    { nomeMes: 'MTinta 01', maquina: 'Marcação Tinta - 1', centro: 'MTI001', uvLed: true, uv: false, uv2: false, cadencia: 11, oee: 80 },
-    { nomeMes: 'MTinta 02', maquina: 'Marcação Tinta - 2', centro: 'MTI001', uvLed: true, uv: false, uv2: false, cadencia: 11, oee: 80 },
-    { nomeMes: 'MTinta 03', maquina: 'Marcação Tinta - 3', centro: 'MTI001', uvLed: true, uv: false, uv2: false, cadencia: 11, oee: 80 },
-    { nomeMes: 'MTinta 04', maquina: 'Marcação Tinta - 4', centro: 'MTI001', uvLed: true, uv: false, uv2: false, cadencia: 11, oee: 80 },
-    { nomeMes: 'MTinta 05', maquina: 'Marcação Tinta - 5', centro: 'MTI001', uvLed: true, uv: false, uv2: false, cadencia: 11, oee: 80 },
-    { nomeMes: 'MTinta 06', maquina: 'Marcação Tinta - 6', centro: 'MTI001', uvLed: true, uv: false, uv2: false, cadencia: 11, oee: 80 },
-    { nomeMes: 'MTinta 07', maquina: 'Marcação Tinta - 7', centro: 'MTI001', uvLed: false, uv: true, uv2: false, cadencia: 11, oee: 80 },
-    { nomeMes: 'MTinta 08', maquina: 'Marcação Tinta - 8', centro: 'MTI001', uvLed: false, uv: true, uv2: false, cadencia: 11, oee: 80 },
-    { nomeMes: 'MTinta 09', maquina: 'Marcação Tinta - 9', centro: 'MTI001', uvLed: false, uv: true, uv2: false, cadencia: 11, oee: 90 },
-    { nomeMes: 'MTinta 10', maquina: 'Marcação Tinta - 10', centro: 'MTI001', uvLed: false, uv: false, uv2: true, cadencia: 11, oee: 0 },
-    { nomeMes: 'MTinta 11', maquina: 'Marcação Tinta - 11', centro: 'MTI001', uvLed: false, uv: false, uv2: true, cadencia: 11, oee: 0 },
-    { nomeMes: 'MTinta 12', maquina: 'Marcação Tinta - 12', centro: 'MTI001', uvLed: false, uv: false, uv2: true, cadencia: 11, oee: 0 },
-    { nomeMes: 'MTinta 13', maquina: 'Marcação Tinta - 13', centro: 'MTI001', uvLed: true, uv: false, uv2: false, cadencia: 11, oee: 80 },
-    { nomeMes: 'MTinta 14', maquina: 'Marcação Tinta - 14', centro: 'MTI001', uvLed: false, uv: true, uv2: false, cadencia: 11, oee: 80 },
-    { nomeMes: 'MTinta 15', maquina: 'Marcação Tinta - 15', centro: 'MTI001', uvLed: false, uv: true, uv2: false, cadencia: 11, oee: 80 },
-    { nomeMes: 'MTinta 16', maquina: 'Marcação Tinta - 16', centro: 'MTI001', uvLed: false, uv: true, uv2: false, cadencia: 11, oee: 80 },
-    { nomeMes: 'MTinta 17', maquina: 'Marcação Tinta - 17', centro: 'MTI001', uvLed: false, uv: true, uv2: false, cadencia: 11, oee: 80 },
-    { nomeMes: 'MTinta 18', maquina: 'Marcação Tinta - 18', centro: 'MTI001', uvLed: false, uv: true, uv2: false, cadencia: 11, oee: 80 }
+    { nomeMes: 'MTinta 01', maquina: 'Marcação Tinta - 1', centro: 'MTI001', cadencia: 11, oee: 80 },
+    { nomeMes: 'MTinta 02', maquina: 'Marcação Tinta - 2', centro: 'MTI001', cadencia: 11, oee: 80 },
+    { nomeMes: 'MTinta 03', maquina: 'Marcação Tinta - 3', centro: 'MTI001', cadencia: 11, oee: 80 },
+    { nomeMes: 'MTinta 04', maquina: 'Marcação Tinta - 4', centro: 'MTI001', cadencia: 11, oee: 80 },
+    { nomeMes: 'MTinta 05', maquina: 'Marcação Tinta - 5', centro: 'MTI001', cadencia: 11, oee: 80 },
+    { nomeMes: 'MTinta 06', maquina: 'Marcação Tinta - 6', centro: 'MTI001', cadencia: 11, oee: 80 },
+    { nomeMes: 'MTinta 07', maquina: 'Marcação Tinta - 7', centro: 'MTI001', cadencia: 11, oee: 80 },
+    { nomeMes: 'MTinta 08', maquina: 'Marcação Tinta - 8', centro: 'MTI001', cadencia: 11, oee: 80 },
+    { nomeMes: 'MTinta 09', maquina: 'Marcação Tinta - 9', centro: 'MTI001', cadencia: 11, oee: 90 },
+    { nomeMes: 'MTinta 10', maquina: 'Marcação Tinta - 10', centro: 'MTI001', cadencia: 11, oee: 0 },
+    { nomeMes: 'MTinta 11', maquina: 'Marcação Tinta - 11', centro: 'MTI001', cadencia: 11, oee: 0 },
+    { nomeMes: 'MTinta 12', maquina: 'Marcação Tinta - 12', centro: 'MTI001', cadencia: 11, oee: 0 },
+    { nomeMes: 'MTinta 13', maquina: 'Marcação Tinta - 13', centro: 'MTI001', cadencia: 11, oee: 80 },
+    { nomeMes: 'MTinta 14', maquina: 'Marcação Tinta - 14', centro: 'MTI001', cadencia: 11, oee: 80 },
+    { nomeMes: 'MTinta 15', maquina: 'Marcação Tinta - 15', centro: 'MTI001', cadencia: 11, oee: 80 },
+    { nomeMes: 'MTinta 16', maquina: 'Marcação Tinta - 16', centro: 'MTI001', cadencia: 11, oee: 80 },
+    { nomeMes: 'MTinta 17', maquina: 'Marcação Tinta - 17', centro: 'MTI001', cadencia: 11, oee: 80 },
+    { nomeMes: 'MTinta 18', maquina: 'Marcação Tinta - 18', centro: 'MTI001', cadencia: 11, oee: 80 }
   ];
 
   var MAQUINAS_FLOW_ROWS = { distribuicao: MAQUINAS_DISTRIBUICAO_ROWS, ndtech: MAQUINAS_NDTECH_ROWS };
@@ -4045,12 +4042,11 @@
     var rowsHtml = rows.map(function (r) {
       var trueIdx = MAQUINAS_TINTA_ROWS.indexOf(r);
       return '<tr><td>' + r.nomeMes + '</td><td>' + r.maquina + '</td><td>' + r.centro + '</td>' +
-        '<td class="prod-cell">' + fogoCheck(r.uvLed, false) + '</td><td class="prod-cell">' + fogoCheck(r.uv, false) + '</td><td class="prod-cell">' + fogoCheck(r.uv2, false) + '</td>' +
         '<td class="prod-cell">' + r.cadencia + '</td><td class="prod-cell">' + r.oee + '</td>' +
         '<td class="prod-cell"><button class="icon-inline-btn" data-edit-idx="' + trueIdx + '" title="Editar">' + svg('pencil', 'width="14" height="14"') + '</button></td></tr>';
     }).join('');
     return banner + maquinasMaquinaFilter('distribuicao', MAQUINAS_TINTA_ROWS.map(function (r) { return r.nomeMes; })) +
-      '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Nome MES</th><th>Máquina</th><th>Centro de Trabalho</th><th>UV LED</th><th>UV</th><th>UV 2</th><th>Cadência (Mil/h)</th><th>OEE (%)</th><th>Ações</th></tr></thead><tbody>' + (rowsHtml || '<tr><td colspan="9"><div class="empty-state">Sem máquinas para este filtro.</div></td></tr>') + '</tbody></table></div>';
+      '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Nome MES</th><th>Máquina</th><th>Centro de Trabalho</th><th>Cadência (Mil/h)</th><th>OEE (%)</th><th>Ações</th></tr></thead><tbody>' + (rowsHtml || '<tr><td colspan="6"><div class="empty-state">Sem máquinas para este filtro.</div></td></tr>') + '</tbody></table></div>';
   }
 
   function maquinasFlowPageTemplate(flowKey) {
