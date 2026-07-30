@@ -3050,12 +3050,10 @@
      ================================================================== */
   var INTERVALO_OPTIONS = ['Dias úteis', 'Semanal', 'Quinzenal'];
   var inatividadeToleranciaProducao = 10;
-  var INATIVIDADE_FECHO_TABS = ['Embalagem', 'Semanais', 'Outros', 'Kanbans'];
+  var INATIVIDADE_FECHO_TABS = ['Embalagem', 'Semanais'];
   var INATIVIDADE_FECHO_CONFIG = {
     Embalagem: { quantidadeProduzida: true, ovInexistente: true, semProducao: { ativo: true, intervalo: 'Dias úteis', dias: 300 }, aposProducao: { ativo: true, intervalo: 'Dias úteis', dias: 300 } },
-    Semanais: { quantidadeProduzida: false, semProducao: { ativo: true, intervalo: 'Semanal' }, aposProducao: { ativo: true, intervalo: 'Semanal' } },
-    Outros: { quantidadeProduzida: true, semProducao: { ativo: true, intervalo: 'Quinzenal' }, aposProducao: { ativo: true, intervalo: 'Quinzenal' } },
-    Kanbans: { quantidadeProduzida: true, semProducao: { ativo: true, intervalo: 'Semanal' }, aposProducao: { ativo: true, intervalo: 'Semanal' } }
+    Semanais: { quantidadeProduzida: false, semProducao: { ativo: true, intervalo: 'Semanal' }, aposProducao: { ativo: true, intervalo: 'Semanal' } }
   };
   var inatividadeFechoState = { tab: 'Embalagem' };
 
@@ -3075,7 +3073,12 @@
 
   function renderInatividadeFecho() {
     var cfg = INATIVIDADE_FECHO_CONFIG[inatividadeFechoState.tab];
-    var tolerancia = '<div style="padding:14px;"><div class="outline-field"><label>Tolerância de produção</label><input type="number" id="inatTolerancia" value="' + inatividadeToleranciaProducao + '"><span class="suffix">%</span></div></div>';
+    var tolerancia = '<div style="border:1px solid var(--border-primary);border-radius:8px;padding:14px 16px;margin:14px;display:flex;align-items:center;gap:14px;">' +
+      '<span style="font-size:12.5px;color:var(--text-primary);">Tolerância de produção</span>' +
+      '<div style="border:1px solid var(--border-primary);border-radius:6px;padding:5px 10px;display:inline-flex;align-items:baseline;gap:3px;">' +
+      '<input type="number" id="inatTolerancia" value="' + inatividadeToleranciaProducao + '" style="width:36px;border:none;outline:none;background:transparent;font-size:14px;color:var(--text-primary);">' +
+      '<span style="font-size:9px;color:var(--text-muted);">%</span>' +
+      '</div></div>';
     var intro = '<div style="padding:0 14px 12px;"><div style="font-weight:700;font-size:13px;">Formas de fecho por tab</div><div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Para cada tab de gestão de OFs, escolha que formas de fecho estão ativas e o intervalo de cada inatividade.</div></div>';
     var tabsHtml = renderTabsBar('inatFechoTabs', INATIVIDADE_FECHO_TABS.map(function (t) { return { key: t, label: t }; }), inatividadeFechoState.tab, 'inatfechotab');
     var rows = switchRow('Quantidade produzida', cfg.quantidadeProduzida, 'quantidadeProduzida') +
@@ -4994,30 +4997,6 @@
     }
   }
 
-  var PRIORIDADES_RECURSOS = [
-    { grupo: 'Escolha', maquina: 'ESC001', prioridade: 1, flow: 'distribuicao' },
-    { grupo: 'Escolha', maquina: 'ESC002', prioridade: 2, flow: 'distribuicao' },
-    { grupo: 'Marcação Laser', maquina: 'MLS001-M1', prioridade: 1, flow: 'distribuicao' },
-    { grupo: 'Marcação Laser', maquina: 'MLS001-M2', prioridade: 2, flow: 'distribuicao' },
-    { grupo: 'Marcação Laser', maquina: 'MLS001-M3', prioridade: 3, flow: 'distribuicao' },
-    { grupo: 'Marcação Fogo', maquina: 'MFO001-M1', prioridade: 1, flow: 'distribuicao' },
-    { grupo: 'Marcação Fogo', maquina: 'MFO001-M2', prioridade: 2, flow: 'distribuicao' },
-    { grupo: 'Tratamento', maquina: 'TRT002-M1', prioridade: 1, flow: 'distribuicao' },
-    { grupo: 'Tratamento', maquina: 'TRT002-M3', prioridade: 2, flow: 'distribuicao' },
-    { grupo: 'Tratamento', maquina: 'TRT001-M5', prioridade: 3, flow: 'distribuicao' },
-    { grupo: 'NDTech · Calibre 45x24 e 49x24', maquina: 'Máquina 1', prioridade: 1, flow: 'ndtech' },
-    { grupo: 'NDTech · Calibre 45x24 e 49x24', maquina: 'Máquina 2', prioridade: 2, flow: 'ndtech' },
-    { grupo: 'NDTech · Calibre 45x24 e 49x24', maquina: 'Máquina 3', prioridade: 3, flow: 'ndtech' },
-    { grupo: 'NDTech · Calibre 45x24 e 49x24', maquina: 'Máquina 4', prioridade: 4, flow: 'ndtech' },
-    { grupo: 'NDTech · Calibre 45x24 e 49x24', maquina: 'Máquina 5', prioridade: 5, flow: 'ndtech' },
-    { grupo: 'NDTech · Calibre 45x24 e 49x24', maquina: 'Máquina 6', prioridade: 6, flow: 'ndtech' },
-    { grupo: 'NDTech · Todos os Artigos', maquina: 'Máquina 7', prioridade: 1, flow: 'ndtech' },
-    { grupo: 'NDTech · Todos os Artigos', maquina: 'Máquina 8', prioridade: 2, flow: 'ndtech' },
-    { grupo: 'NDTech · Todos os Artigos', maquina: 'Máquina 9', prioridade: 3, flow: 'ndtech' },
-    { grupo: 'NDTech · Todos os Artigos', maquina: 'Máquina 10', prioridade: 4, flow: 'ndtech' },
-    { grupo: 'NDTech · Exceção (sem PS e G2)', maquina: 'Máquina 11', prioridade: 1, flow: 'ndtech', nota: 'Só 45x24 e 49x24 que não sejam PS e G2' }
-  ];
-
   var RESTRICOES_ROWS = [
     { tipoMaquina: 'Marcação Laser', calibre: '45x24', lavacao: 'Todas', classe: 'Extra', marcacao: 'Laser', tratamento: 'Todos', restricao: 'Só aceita calibre 45x24 ou superior' },
     { tipoMaquina: 'Tratamento', calibre: 'Todos', lavacao: 'Natural', classe: 'Todas', marcacao: 'Todos', tratamento: 'BV Automático', restricao: 'Não aceita artigos sem tratamento prévio de lavação' },
@@ -5032,29 +5011,6 @@
     { centro: 'EMB001', entrada: 'ARM-EMB-IN', saida: 'ARM-EMB-OUT' },
     { centro: 'EMB002', entrada: 'ARM-EMB-IN', saida: 'ARM-EMB-OUT' }
   ];
-
-  var PREFERENCIAS_MAQUINA_ROWS = [
-    { setor: 'EET002 · Escolha Eletrónica', grupo: 'EET002', maquina: 'Máquina 1 · EET002', nivel: 'Material', prioridades: ['RT NAT 44X24 CF CLEAR M T E', 'RT NAT 49X24 CF CLEAR M T E'] },
-    { setor: 'EET002 · Escolha Eletrónica', grupo: 'EET002', maquina: 'Máquina 2 · EET002', nivel: 'Material', prioridades: ['RT NAT 49X24 CF CLEAR M T E', 'RT NAT 49X24 CF CL0 M T E', 'RT NAT 44X24 CF CL0 M T E'] },
-    { setor: 'EET002 · Escolha Eletrónica', grupo: 'EET002', maquina: 'Máquina 3 · EET002', nivel: 'Material', prioridades: ['RT NAT 44X24 CF CL0 M T E', 'RT NAT 49X24 CF CL0 M T E'] },
-    { setor: 'MFO001 · Marcação Fogo', grupo: 'MFO001', maquina: 'MFogo 02', nivel: 'Material', prioridades: ['RT NEUT 44X24 CF CLEAR M T E', 'RT NEUT 38X24 CF CLEAR M T E'] },
-    { setor: 'MFO001 · Marcação Fogo', grupo: 'MFO001', maquina: 'MFogo 03', nivel: 'Material', prioridades: ['RT NEUT 38X24 CF CLEAR M T E', 'RT NEUT 44X24 CF CLEAR M T E', 'RT XPUR 44X24 CF CL0 M T E'] },
-    { setor: 'NDR001 · NDTech', grupo: 'NDR001', maquina: 'Máquina 2 · NDR001', nivel: 'Material', prioridades: ['RE CH_ 44X24 AA E', 'RE CH_ 44X24 AB E'] }
-  ];
-  var preferenciasState = { view: 'maquina' };
-
-  function computePreferenciasPorArtigo() {
-    var map = {};
-    PREFERENCIAS_MAQUINA_ROWS.forEach(function (row) {
-      row.prioridades.forEach(function (artigo, idx) {
-        if (!map[artigo]) map[artigo] = [];
-        map[artigo].push({ maquina: row.maquina, rank: idx + 1 });
-      });
-    });
-    return Object.keys(map).map(function (artigo) { return { artigo: artigo, maquinas: map[artigo] }; });
-  }
-
-  function rankChipTone(rank) { return rank === 1 ? 'pill-good' : rank <= 3 ? 'pill-warn' : 'pill-bad'; }
 
   var OCUPACAO_MAXIMA_ROWS = [
     { deposito: 'PK02', descricao: '[PTK SM] Receção Rolhas' },
@@ -5100,20 +5056,12 @@
     { key: 'turnos', label: 'Turnos' },
     { key: 'setups', label: 'Setups' },
     { key: 'leadtimes', label: 'Lead Times' },
-    { key: 'prioridades', label: 'Prioridades' },
     { key: 'restricoes', label: 'Restrições' },
-    { key: 'preferencias', label: 'Preferências' },
     { key: 'gruposCentros', label: 'Centros de Trabalho' },
     { key: 'mapeamentoDepositos', label: 'Mapeamento de Depósitos' },
     { key: 'ocupacaoMaxima', label: 'Parametrizações' }
   ];
   var configRecState = { tab: 'setups' };
-
-  function chipList(items, cls) {
-    return items.map(function (s) { return '<span class="chip-filter active" style="' + (cls || '') + 'margin-right:4px;cursor:default;">' + s + '</span>'; }).join('');
-  }
-
-  function overflowChip(n) { return n ? '<span class="stat-pill pill-neutral">+' + n + '</span>' : ''; }
 
   function protoActions() {
     return '<button class="icon-inline-btn" title="Editar">' + svg('pencil', 'width="14" height="14"') + '</button><button class="icon-inline-btn" title="Eliminar">🗑</button>';
@@ -5125,53 +5073,15 @@
     });
   }
 
-  function renderPreferenciasMaquinaTable() {
-    var rows = PREFERENCIAS_MAQUINA_ROWS.map(function (r) {
-      var prio = r.prioridades.map(function (artigo, idx) {
-        return '<span class="stat-pill ' + rankChipTone(idx + 1) + '" style="margin-right:4px;">#' + (idx + 1) + ' ' + artigo + '</span>';
-      }).join('');
-      return '<tr><td>' + r.setor + '</td><td class="prod-cell">' + r.grupo + '</td><td class="prod-cell">' + chipList([r.maquina]) + '</td><td>' + r.nivel + '</td><td>' + prio + '</td><td class="prod-cell">' + protoActions() + '</td></tr>';
-    }).join('');
-    return '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Setor</th><th>Grupo</th><th>Máquina</th><th>Nível</th><th>Prioridades</th><th>Ações</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
-  }
-
-  function renderPreferenciasArtigoTable() {
-    var data = computePreferenciasPorArtigo();
-    var rows = data.map(function (d) {
-      var maquinasHtml = d.maquinas.map(function (m) {
-        return '<span class="stat-pill ' + rankChipTone(m.rank) + '" style="margin-right:4px;">#' + m.rank + ' ' + m.maquina + '</span>';
-      }).join('');
-      return '<tr><td>' + d.artigo + '</td><td class="prod-cell">' + d.maquinas.length + '</td><td>' + maquinasHtml + '</td><td class="prod-cell">' + protoActions() + '</td></tr>';
-    }).join('');
-    return '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Artigo</th><th>Nº Máquinas</th><th>Máquinas (por prioridade)</th><th>Ações</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
-  }
-
-  function renderPreferencias() {
-    var toggle = '<div class="prod-toolbar">' +
-      '<button class="btn' + (preferenciasState.view === 'maquina' ? ' btn-primary' : '') + '" data-prefview="maquina">Por Máquina</button>' +
-      '<button class="btn' + (preferenciasState.view === 'artigo' ? ' btn-primary' : '') + '" data-prefview="artigo">Por Artigo</button>' +
-      '<div class="toolbar-spacer"></div><button class="btn btn-primary" id="prefAdicionar">+ Adicionar Preferência</button>' +
-      '</div>';
-    var table = preferenciasState.view === 'maquina' ? renderPreferenciasMaquinaTable() : renderPreferenciasArtigoTable();
-    return toggle + table;
-  }
-
   function renderConfigRecursosBodyHtml() {
     var key = configRecState.tab;
     if (key === 'turnos') return renderTurnosBodyHtml();
     if (key === 'setups') return renderStaticTable([{ key: 'setor', label: 'Setor' }, { key: 'variavel', label: 'Variável(eis) de Setup' }, { key: 'min', label: 'Setup min (mins)', center: true }, { key: 'troca', label: 'Setup troca (mins)', center: true }], SETUPS_ROWS, renderConfigRecursosBody);
     if (key === 'leadtimes') return renderLeadTimesComExcecoes();
     if (key === 'gruposCentros') return renderStaticTable([{ key: 'centro', label: 'Centro de Trabalho' }, { key: 'grupo', label: 'Grupo' }], GRUPOS_CENTROS_TRABALHO, renderConfigRecursosBody);
-    if (key === 'prioridades') return renderStaticTable([
-      { key: 'grupo', label: 'Grupo' },
-      { key: 'prioridade', label: 'Prioridade', center: true },
-      { key: 'maquina', label: 'Máquina' },
-      { key: 'nota', label: 'Critério', render: function (r) { return r.nota || '<span style="color:var(--text-muted)">—</span>'; } }
-    ], PRIORIDADES_RECURSOS.filter(function (r) { return !r.flow || r.flow === state.globalFlow; }), renderConfigRecursosBody);
     if (key === 'restricoes') return renderStaticTable([{ key: 'tipoMaquina', label: 'Tipo de Máquina' }, { key: 'calibre', label: 'Calibre' }, { key: 'lavacao', label: 'Lavação' }, { key: 'classe', label: 'Classe' }, { key: 'marcacao', label: 'Marcação' }, { key: 'tratamento', label: 'Tratamento' }, { key: 'restricao', label: 'Restrição' }], RESTRICOES_ROWS, renderConfigRecursosBody);
     if (key === 'mapeamentoDepositos') return renderStaticTable([{ key: 'centro', label: 'Centro de Trabalho' }, { key: 'entrada', label: 'Armazém de Entrada' }, { key: 'saida', label: 'Armazém de Saída' }], MAPEAMENTO_DEPOSITOS, renderConfigRecursosBody);
-    if (key === 'ocupacaoMaxima') return renderOcupacaoMaxima();
-    return renderPreferencias();
+    return renderOcupacaoMaxima();
   }
 
   function configRecursosPageTemplate() {
@@ -5197,13 +5107,6 @@
     body.innerHTML = renderConfigRecursosBodyHtml();
     if (configRecState.tab === 'turnos') {
       bindTurnosBody(body);
-    } else if (configRecState.tab === 'preferencias') {
-      body.querySelectorAll('[data-prefview]').forEach(function (btn) {
-        btn.addEventListener('click', function () { preferenciasState.view = btn.getAttribute('data-prefview'); renderConfigRecursosBody(); });
-      });
-      var prefAdd = body.querySelector('#prefAdicionar');
-      if (prefAdd) prefAdd.addEventListener('click', function () { showToast('Preferência adicionada (protótipo)'); });
-      bindProtoActions(body);
     }
   }
 
