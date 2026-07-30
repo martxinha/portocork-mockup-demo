@@ -4553,11 +4553,30 @@
     { atual: 'LAV001 · Lavação', seguinte: 'NDR001/NDC001 · NDTech (Prestação de Serviços)', dias: 3, nota: 'Espera por artigos de fornecedor externo quando a lavação interna está sobrecarregada', flow: 'ndtech' }
   ];
 
+  var LEAD_TIME_QUALIDADE_ROWS = [
+    { momento: 'Escolha → Cork Sense (Controlo de Qualidade)', dias: 0.5, flow: 'distribuicao' },
+    { momento: 'Cork Sense → Marcação (Controlo de Qualidade)', dias: 0.5, flow: 'distribuicao' },
+    { momento: 'Embalagem → Expedição (Controlo de Qualidade Final)', dias: 0.5, flow: 'distribuicao' },
+    { momento: 'Embalagem → Expedição (Controlo de Qualidade Final)', dias: 0.5, flow: 'ndtech' }
+  ];
+
+  var LEAD_TIME_PS_ROWS = [
+    { processo: 'Lavação (Prestação de Serviços)', fornecedor: 'VL', dias: 3, nota: 'Espera por artigos de fornecedor externo quando a lavação interna está sobrecarregada', flow: 'ndtech' },
+    { processo: 'Marcação a Fogo (Prestação de Serviços)', fornecedor: 'Cortiças Robinson, Lda.', dias: 2, nota: '', flow: 'distribuicao' },
+    { processo: 'Escolha Eletrónica (Prestação de Serviços)', fornecedor: 'J. Guimarães & Filhos', dias: 4, nota: '', flow: 'ndtech' }
+  ];
+
   function renderLeadTimesComExcecoes() {
     var rows = LEAD_TIMES_SETORES.filter(function (r) { return !r.flow || r.flow === state.globalFlow; });
     var setores = renderStaticTable([{ key: 'atual', label: 'Setor Atual' }, { key: 'seguinte', label: 'Setor Seguinte' }, { key: 'dias', label: 'Lead Time (dias)', center: true }, { key: 'nota', label: 'Nota', render: function (r) { return r.nota || '<span style="color:var(--text-muted)">—</span>'; } }], rows, renderConfigRecursosBody);
+    var qualidadeRows = LEAD_TIME_QUALIDADE_ROWS.filter(function (r) { return !r.flow || r.flow === state.globalFlow; });
+    var qualidade = renderStaticTable([{ key: 'momento', label: 'Momento de Controlo de Qualidade' }, { key: 'dias', label: 'Lead Time (dias)', center: true }], qualidadeRows, renderConfigRecursosBody);
+    var psRows = LEAD_TIME_PS_ROWS.filter(function (r) { return !r.flow || r.flow === state.globalFlow; });
+    var prestacaoServicos = renderStaticTable([{ key: 'processo', label: 'Processo' }, { key: 'fornecedor', label: 'Fornecedor' }, { key: 'dias', label: 'Lead Time (dias)', center: true }, { key: 'nota', label: 'Nota', render: function (r) { return r.nota || '<span style="color:var(--text-muted)">—</span>'; } }], psRows, renderConfigRecursosBody);
     return '<div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:13px;">Lead Times entre Processos</h1></div>' + setores +
-      (state.globalFlow === 'distribuicao' ? renderTemposEstabilizacaoSection(renderConfigRecursosBody) : '');
+      (state.globalFlow === 'distribuicao' ? renderTemposEstabilizacaoSection(renderConfigRecursosBody) : '') +
+      '<div class="section-head" style="padding:28px 14px 0;"><h1 style="font-size:13px;">Lead Time de Qualidade</h1></div>' + qualidade +
+      '<div class="section-head" style="padding:28px 14px 0;"><h1 style="font-size:13px;">Lead Time de Prestação de Serviços</h1></div>' + prestacaoServicos;
   }
 
   var MULTIPLOS_PALETE = [
