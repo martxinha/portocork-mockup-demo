@@ -1370,7 +1370,6 @@
     ofsSemanais: 'OFs Semanais',
     ofsCriar: 'Criar',
     ofsEliminar: 'Eliminar',
-    ofsListaStandard: 'Lista Standard',
     ofsConfiguracoes: 'Configurações',
     stos: 'STOs',
     perfilFornecedores: 'Perfil de Fornecedores',
@@ -1404,7 +1403,6 @@
         { key: 'ofsSemanais', title: 'OFs Semanais' },
         { key: 'ofsCriar', title: 'Criar' },
         { key: 'ofsEliminar', title: 'Eliminar' },
-        { key: 'ofsListaStandard', title: 'Lista Standard' },
         { key: 'ofsConfiguracoes', title: 'Configurações' }
       ]
     },
@@ -3048,68 +3046,8 @@
   function bindOfsEliminarControls() { renderEliminarBody(); }
 
   /* ==================================================================
-     Gestão de OFs > Lista Standard
-     ================================================================== */
-  var LISTA_STANDARD_ROWS = [
-    { workcenter: 'EMB001', material: '60018271', descricao: 'ROLHA NAT 39X25 3/4 BRANCO PVF', qtd: 150 },
-    { workcenter: 'EMB001', material: '60018341', descricao: 'ROLHA NAT 45X25 4 BRANCO PVF', qtd: 60 },
-    { workcenter: 'EMB001', material: '60018360', descricao: 'ROLHA NAT 45X26 4/5 BRANCO PVF', qtd: 435 },
-    { workcenter: 'EMB001', material: '60018538', descricao: 'ROLHA NAT 38X24 4 BRANCO PVF', qtd: 80 },
-    { workcenter: 'EMB001', material: '60018542', descricao: 'ROLHA NAT 38X24 4 ROSADO PVF', qtd: 190 },
-    { workcenter: 'EMB001', material: '60018575', descricao: 'ROLHA NAT 38X24 6 CF BRANCO PVF', qtd: 1025 },
-    { workcenter: 'EMB001', material: '60018580', descricao: 'ROLHA NAT 38X24 6 CF ROSADO PVF', qtd: 115 },
-    { workcenter: 'EMB002', material: '60018622', descricao: 'ROLHA NAT 45X24 2 NATURAL PVF', qtd: 125 },
-    { workcenter: 'EMB002', material: '60018645', descricao: 'ROLHA NAT 45X24 3 NOVA PVF', qtd: 200 },
-    { workcenter: 'EMB002', material: '60018653', descricao: 'ROLHA NAT 45X24 4 BRANCO PVF', qtd: 2765 },
-    { workcenter: 'EMB002', material: '60018657', descricao: 'ROLHA NAT 45X24 4 ROSADO PVF', qtd: 640 },
-    { workcenter: 'EMB002', material: '60018679', descricao: 'ROLHA NAT 45X24 5 BRANCO PVF', qtd: 850 },
-    { workcenter: 'EMB002', material: '60018683', descricao: 'ROLHA NAT 45X24 5 ROSADO PVF', qtd: 500 },
-    { workcenter: 'EMB001', material: '60018706', descricao: 'ROLHA NAT 45X24 6 CF BRANCO PVF', qtd: 75 },
-    { workcenter: 'EMB001', material: '60018711', descricao: 'ROLHA NAT 45X24 6 CF ROSADO PVF', qtd: 305 },
-    { workcenter: 'EMA001', material: '60018748', descricao: 'ROLHA NAT 45X26 2 NATURAL PVF', qtd: 100 },
-    { workcenter: 'EMB001', material: '60018791', descricao: 'ROLHA NAT 49X24 4 BRANCO PVF', qtd: 270 },
-    { workcenter: 'EMB001', material: '60018803', descricao: 'ROLHA NAT 49X24 5 BRANCO PVF', qtd: 45 },
-    { workcenter: 'EMB001', material: '60018805', descricao: 'ROLHA NAT 49X24 5 ROSADO PVF', qtd: 90 }
-  ];
-
-  function ofsListaStandardPageTemplate() {
-    var toolbar = '<div class="prod-toolbar"><div class="toolbar-spacer"></div>' +
-      '<button class="btn" data-msg="Importação Excel (protótipo)" id="listaStdImportar">' + svg('upload', 'width="14" height="14"') + ' Importar Excel</button>' +
-      '<button class="btn btn-primary" data-msg="Linha adicionada (protótipo)" id="listaStdAdicionar">Adicionar</button></div>';
-    var table = '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Centro de Trabalho</th><th>Material</th><th>Descrição</th><th>VP</th><th>Qtd Default (ML)</th></tr></thead><tbody>' +
-      LISTA_STANDARD_ROWS.map(function (r) {
-        return '<tr><td>' + r.workcenter + '</td><td>' + r.material + '</td><td>' + r.descricao + '</td><td><span class="stat-pill pill-neutral" style="font-size:9px;">VP 1</span> ' + r.workcenter + '_' + r.descricao + '</td><td class="prod-cell">' + r.qtd + '</td></tr>';
-      }).join('') + '</tbody></table></div>';
-    return '<div class="content-card">' + toolbar + table + '</div>';
-  }
-
-  function bindOfsListaStandardControls() {
-    document.getElementById('listaStdImportar').addEventListener('click', function () { showToast('Importação Excel (protótipo)'); });
-    document.getElementById('listaStdAdicionar').addEventListener('click', function () { showToast('Linha adicionada (protótipo)'); });
-  }
-
-  /* ==================================================================
      Gestão de OFs > Configurações
      ================================================================== */
-  var ofsConfigState = { tab: 'autoGeracao' };
-  var OFS_CONFIG_ROWS = [
-    { workcenter: 'EMB001', categoria: 'Lista Standard', consumos: true, sources: '—', lookbehind: 0 },
-    { workcenter: 'AE1001', categoria: 'Sequenciamento', consumos: false, sources: '—', lookbehind: 0 },
-    { workcenter: 'BRA001', categoria: 'Sequenciamento', consumos: true, sources: '—', lookbehind: 0 },
-    { workcenter: 'BRA001', categoria: 'Lista Standard', consumos: true, sources: '—', lookbehind: 0 },
-    { workcenter: 'BRI001', categoria: 'Sequenciamento', consumos: true, sources: '—', lookbehind: 0 },
-    { workcenter: 'BRI001', categoria: 'Lista Standard', consumos: true, sources: '—', lookbehind: 0 },
-    { workcenter: 'BRP001', categoria: 'Sequenciamento', consumos: true, sources: '—', lookbehind: 0 },
-    { workcenter: 'CHA001', categoria: 'Lista Standard', consumos: true, sources: '—', lookbehind: 0 },
-    { workcenter: 'DEL001', categoria: 'Espelho Materiais', consumos: true, sources: '3', lookbehind: null },
-    { workcenter: 'EET004', categoria: 'Lista Standard', consumos: true, sources: '—', lookbehind: 0 },
-    { workcenter: 'EET005', categoria: 'Lista Standard', consumos: true, sources: '—', lookbehind: 0 },
-    { workcenter: 'EMA001', categoria: 'Lista Standard', consumos: false, sources: '—', lookbehind: 0 },
-    { workcenter: 'LAV001', categoria: 'Lista Standard', consumos: true, sources: '—', lookbehind: 0 },
-    { workcenter: 'POL001', categoria: 'Lista Standard', consumos: true, sources: '—', lookbehind: 0 },
-    { workcenter: 'POT001', categoria: 'Lista Standard', consumos: true, sources: '—', lookbehind: 0 }
-  ];
-
   var INTERVALO_OPTIONS = ['Dias úteis', 'Semanal', 'Quinzenal'];
   var inatividadeToleranciaProducao = 10;
   var INATIVIDADE_FECHO_TABS = ['Embalagem', 'Semanais', 'Outros', 'Kanbans'];
@@ -3178,42 +3116,9 @@
     });
   }
 
-  function categoriaBadge(cat) {
-    var cls = cat === 'Espelho Materiais' ? 'pill-warn' : cat === 'Sequenciamento' ? 'pill-good' : 'pill-neutral';
-    var icon = cat === 'Espelho Materiais' ? 'copy' : cat === 'Sequenciamento' ? 'sequence' : 'list';
-    return '<span class="stat-pill ' + cls + '" style="display:inline-flex;align-items:center;gap:4px;">' + svg(icon, 'width="11" height="11"') + cat + '</span>';
-  }
-
-  function frequenciaPill() {
-    return '<span class="stat-pill" style="background:var(--brand-accent);color:#fff;display:inline-flex;align-items:center;gap:4px;">Semanal' + svg('chevronDown', 'width="10" height="10"') + '</span>';
-  }
-
-  function lookbehindCell(r) {
-    if (r.lookbehind == null) return '<span style="color:var(--text-muted)">—</span>';
-    return '<span class="stat-pill pill-neutral" style="display:inline-flex;align-items:center;gap:3px;">' + svg('refresh', 'width="10" height="10"') + r.lookbehind + '</span>';
-  }
-
-  function sourcesCell(r) {
-    if (r.sources === '—') return '<span style="color:var(--text-muted)">—</span>';
-    return '<span class="stat-pill pill-neutral">' + r.sources + '</span>';
-  }
-
   function ofsConfiguracoesPageTemplate() {
-    var tabsHtml = '<div class="prod-tabs"><div class="prod-tab' + (ofsConfigState.tab === 'autoGeracao' ? ' active' : '') + '" data-ofsconfigtab="autoGeracao">Auto-Geração</div><div class="prod-tab' + (ofsConfigState.tab === 'inatividade' ? ' active' : '') + '" data-ofsconfigtab="inatividade">Inatividade de Fecho</div></div>';
-    var body;
-    if (ofsConfigState.tab === 'autoGeracao') {
-      body = '<div class="prod-toolbar"><div class="toolbar-spacer"></div><button class="btn btn-primary" data-msg="Regra adicionada (protótipo)">' + svg('plus', 'width="14" height="14"') + ' Adicionar</button></div>' +
-        '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Centro de Trabalho</th><th>Categoria</th><th>Frequência</th><th>Consumos Permitidos</th><th>Sources</th><th>Lookbehind</th><th>Ações</th></tr></thead><tbody>' +
-        OFS_CONFIG_ROWS.map(function (r) {
-          return '<tr><td>' + r.workcenter + '</td><td>' + categoriaBadge(r.categoria) + '</td><td class="prod-cell">' + frequenciaPill() + '</td>' +
-            '<td class="prod-cell"><span class="stat-pill ' + (r.consumos ? 'pill-good' : 'pill-neutral') + '">' + (r.consumos ? 'Sim' : 'Não') + '</span></td>' +
-            '<td class="prod-cell">' + sourcesCell(r) + '</td><td class="prod-cell">' + lookbehindCell(r) + '</td>' +
-            '<td class="prod-cell">' + protoActions() + '</td></tr>';
-        }).join('') + '</tbody></table></div>';
-    } else {
-      body = renderInatividadeFecho();
-    }
-    return '<div class="content-card"><div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:15px;">Configuração de OFs</h1><p style="font-size:12px;color:var(--text-secondary);margin:4px 0 0;">Define o ciclo de vida das OFs por centro de trabalho — geração automática e inatividade de fecho.</p></div>' + tabsHtml + body + '</div>';
+    var body = renderInatividadeFecho();
+    return '<div class="content-card"><div class="section-head" style="padding:12px 14px 0;"><h1 style="font-size:15px;">Configuração de OFs</h1><p style="font-size:12px;color:var(--text-secondary);margin:4px 0 0;">Define o ciclo de vida das OFs por centro de trabalho — inatividade de fecho.</p></div>' + body + '</div>';
   }
 
   function renderOfsConfiguracoesBody() {
@@ -3223,17 +3128,7 @@
   }
 
   function bindOfsConfiguracoesControls() {
-    document.querySelectorAll('[data-ofsconfigtab]').forEach(function (tabEl) {
-      tabEl.addEventListener('click', function () {
-        ofsConfigState.tab = tabEl.getAttribute('data-ofsconfigtab');
-        renderOfsConfiguracoesBody();
-      });
-    });
-    document.querySelectorAll('.btn[data-msg]').forEach(function (btn) {
-      btn.addEventListener('click', function () { showToast(btn.getAttribute('data-msg')); });
-    });
-    if (ofsConfigState.tab === 'autoGeracao') bindProtoActions(document.getElementById('mainContent'));
-    if (ofsConfigState.tab === 'inatividade') bindInatividadeFecho(document.getElementById('mainContent'));
+    bindInatividadeFecho(document.getElementById('mainContent'));
   }
 
   /* ==================================================================
@@ -5608,9 +5503,6 @@
     } else if (state.section === 'ofsEliminar') {
       main.innerHTML = '<div class="section-page">' + ofsEliminarPageTemplate() + '</div>';
       bindOfsEliminarControls();
-    } else if (state.section === 'ofsListaStandard') {
-      main.innerHTML = '<div class="section-page">' + ofsListaStandardPageTemplate() + '</div>';
-      bindOfsListaStandardControls();
     } else if (state.section === 'ofsConfiguracoes') {
       main.innerHTML = '<div class="section-page">' + ofsConfiguracoesPageTemplate() + '</div>';
       bindOfsConfiguracoesControls();
