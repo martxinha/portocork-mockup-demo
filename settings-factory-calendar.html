@@ -4554,16 +4554,16 @@
   ];
 
   var LEAD_TIME_QUALIDADE_ROWS = [
-    { momento: 'Escolha → Cork Sense (Controlo de Qualidade)', dias: 0.5, flow: 'distribuicao' },
-    { momento: 'Cork Sense → Marcação (Controlo de Qualidade)', dias: 0.5, flow: 'distribuicao' },
-    { momento: 'Embalagem → Expedição (Controlo de Qualidade Final)', dias: 0.5, flow: 'distribuicao' },
-    { momento: 'Embalagem → Expedição (Controlo de Qualidade Final)', dias: 0.5, flow: 'ndtech' }
+    { momento: 'Escolha → Cork Sense', dias: 0.5, flow: 'distribuicao' },
+    { momento: 'Cork Sense → Marcação', dias: 0.5, flow: 'distribuicao' },
+    { momento: 'Embalagem → Expedição (Final)', dias: 0.5, flow: 'distribuicao' },
+    { momento: 'Embalagem → Expedição (Final)', dias: 0.5, flow: 'ndtech' }
   ];
 
   var LEAD_TIME_PS_ROWS = [
-    { processo: 'Lavação (Prestação de Serviços)', fornecedor: 'VL', dias: 3, nota: 'Espera por artigos de fornecedor externo quando a lavação interna está sobrecarregada', flow: 'ndtech' },
-    { processo: 'Marcação a Fogo (Prestação de Serviços)', fornecedor: 'Cortiças Robinson, Lda.', dias: 2, nota: '', flow: 'distribuicao' },
-    { processo: 'Escolha Eletrónica (Prestação de Serviços)', fornecedor: 'J. Guimarães & Filhos', dias: 4, nota: '', flow: 'ndtech' }
+    { processo: 'Lavação', fornecedor: 'VL', dias: 3, nota: 'Espera por artigos de fornecedor externo quando a lavação interna está sobrecarregada', flow: 'ndtech' },
+    { processo: 'Marcação a Fogo', fornecedor: 'Cortiças Robinson, Lda.', dias: 2, nota: '', flow: 'distribuicao' },
+    { processo: 'Escolha Eletrónica', fornecedor: 'J. Guimarães & Filhos', dias: 4, nota: '', flow: 'ndtech' }
   ];
 
   function renderLeadTimesComExcecoes() {
