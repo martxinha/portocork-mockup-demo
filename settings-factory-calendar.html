@@ -4591,15 +4591,10 @@
     { calibre: '54x26', qtdPl: 50, qtdLav: 38, qtdCarro: 18 }
   ];
 
-  var CONGELAMENTO_SETOR_ROWS = [
-    { setor: 'EMA001 · Escolha', dias: 2, flow: 'distribuicao' },
-    { setor: 'LAV001 · Lavação', dias: 1, flow: null },
-    { setor: 'TRT001/TRT002 · Tratamento', dias: 2, flow: 'distribuicao' },
-    { setor: 'MFO001/MLS001/MTI001 · Marcação', dias: 2, flow: 'distribuicao' },
-    { setor: 'EMB001/EMB002 · Embalagem', dias: 1, flow: null },
-    { setor: 'NDR001/NDC001 · NDTech', dias: 2, flow: 'ndtech' },
-    { setor: 'EET002 · Escolha Eletrónica', dias: 1, flow: 'ndtech' }
-  ];
+  var PERIODO_CONGELAMENTO_CONFIG = {
+    distribuicao: { periodo: 'n+2', notas: ['Não há período de cliente.'] },
+    ndtech: { periodo: 'n+5', notas: ['Se entra uma encomenda, só planeia na próxima semana.', 'O alerta não apresenta a data pedida pelo cliente.'] }
+  };
 
 
   var FORNECEDORES_STO_ROWS = [
@@ -4614,20 +4609,19 @@
   }
 
   function periodoCongelamentoHtml() {
-    var rows = CONGELAMENTO_SETOR_ROWS.filter(function (r) { return !r.flow || r.flow === state.globalFlow; }).map(function (r) {
-      return '<tr><td>' + r.setor + '</td><td class="prod-cell">' + r.dias + '</td><td class="prod-cell">' + protoActions() + '</td></tr>';
-    }).join('');
+    var cfg = PERIODO_CONGELAMENTO_CONFIG[state.globalFlow];
     return '<div id="congelamentoSection">' +
-      '<div class="prod-toolbar"><div class="stat-inline">Dias de bloqueio ao sequenciamento, antes do arranque, por setor / centro de trabalho</div><div class="toolbar-spacer"></div><button class="btn btn-primary" id="congAdicionar">+ Adicionar Setor</button></div>' +
-      '<div class="prod-table-wrap"><table class="prod-table"><thead><tr><th>Setor / Centro de Trabalho</th><th>Dias</th><th>Ações</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<div class="prod-toolbar"><div class="stat-inline">Período de congelamento do planeamento (não se aplica ao sequenciamento)</div></div>' +
+      '<div style="padding:14px;display:flex;align-items:flex-start;gap:16px;">' +
+      '<div class="outline-field"><label>Período</label><input type="text" id="congPeriodo" value="' + cfg.periodo + '" style="width:50px;"></div>' +
+      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;padding-top:4px;">' + cfg.notas.join('<br>') + '</div>' +
+      '</div>' +
       '</div>';
   }
 
   function bindPeriodoCongelamento(root) {
-    var section = root.querySelector('#congelamentoSection');
-    if (section) bindProtoActions(section);
-    var addBtn = root.querySelector('#congAdicionar');
-    if (addBtn) addBtn.addEventListener('click', function () { showToast('Novo setor (protótipo)'); });
+    var input = root.querySelector('#congPeriodo');
+    if (input) input.addEventListener('input', function (e) { PERIODO_CONGELAMENTO_CONFIG[state.globalFlow].periodo = e.target.value; });
   }
 
   /* ---------------- Configurações > Operação ---------------- */
