@@ -1893,6 +1893,7 @@
     perfilFornecedores: 'Perfil de Fornecedores',
     producaoAcompanhamento: 'Acompanhamento da Produção',
     reportPlaneamento: 'Report de Planeamento',
+    controloQualidade: 'Controlo de Qualidade',
     alertas: 'Alertas',
     maquinas: 'Máquinas',
     configOperacao: 'Operação',
@@ -1917,7 +1918,8 @@
       title: 'Acompanhamento',
       submenu: [
         { key: 'producaoAcompanhamento', title: 'Acompanhamento da Produção' },
-        { key: 'reportPlaneamento', title: 'Report de Planeamento' }
+        { key: 'reportPlaneamento', title: 'Report de Planeamento' },
+        { key: 'controloQualidade', title: 'Controlo de Qualidade' }
       ]
     },
     {
@@ -1925,7 +1927,7 @@
       title: 'Gestão de OFs',
       submenu: [
         { key: 'ofsPorLiberar', title: 'OFs por Liberar', flow: 'distribuicao' },
-        { key: 'ofsCriar', title: 'Criar' },
+        { key: 'ofsCriar', title: 'Criar', flow: 'ndtech' },
         { key: 'ofsEliminar', title: 'Eliminar' },
         { key: 'ofsConfiguracoes', title: 'Configurações' }
       ]
@@ -2379,46 +2381,52 @@
   var PROCESSOS = ['Escolha', 'Lavação', 'Tratamento de Superfície', 'Marcação', 'Embalagem'];
   var DIA_ABREV = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
+  /* Cada linha só existe fisicamente num fluxo — Distribuição e NDTech não partilham
+     centro de trabalho nenhum exceto Pesagem (PS001). `flow` vem do centro real
+     (ver NEC_CADEIA/SETUPS_ROWS): sem ele, a linha aparecia nos dois fluxos com um
+     processo que só faz sentido num deles (bug reportado: linhas de Distribuição a
+     aparecer em NDTech com EMA001/MFO001/MTI001/TRT001/TRT002, que o NDTech não tem). */
   var PLANO_ROWS = [
-    { ov: '16451/10', of: 'OF-15200', processo: 'EMA001 · Escolha', artigo: 'ROLHA NAT 45x24', calibre: '45x24', classe: 'Extra', lavacao: 'Natural', objetivoBase: 320, seed: 1.1, cliente: 'BODEGAS DEL NORTE, S.L.' },
-    { ov: '19577/450', of: 'OF-15201', processo: 'LAV001 · Lavação', artigo: 'ROLHA NAT 45x24', calibre: '45x24', classe: 'Extra', lavacao: 'Natural', objetivoBase: 300, seed: 2.3, cliente: 'VINHOS UNIPESSOAL, LDA' },
-    { ov: '62321/40', of: 'OF-15202', processo: 'TRT002 · Tratamento', artigo: 'ROLHA COL 49x24', calibre: '49x24', classe: 'Segunda', lavacao: 'Rosé', objetivoBase: 260, seed: 3.7, cliente: 'ADEGA DO MONTE, LDA.' },
-    { ov: '71182/410', of: 'OF-15203', processo: 'MFO001 · Marcação', artigo: 'ROLHA COL 49x24', calibre: '49x24', classe: 'Segunda', lavacao: 'Rosé', objetivoBase: 240, seed: 4.2, cliente: 'CANTINE DEL SUD, S.R.L.' },
-    { ov: '53135/10', of: 'OF-15204', processo: 'TRT001 · Tratamento', artigo: 'ROLHA NAT 38x24', calibre: '38x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 410, seed: 5.9, cliente: 'QUINTA DO SOBREIRO, CRL' },
-    { ov: '53135/20', of: 'OF-15205', processo: 'EMB001 · Embalagem', artigo: 'ROLHA NAT 38x24', calibre: '38x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 400, seed: 6.4, cliente: 'MAISON VIGNERONS, S.A.S.' },
-    { ov: '92562/10', of: 'OF-15206', processo: 'EMA001 · Escolha', artigo: 'ROLHA TN 45x24', calibre: '45x24', classe: 'Extra', lavacao: 'Natural', objetivoBase: 500, seed: 7.8, cliente: 'HAMMEKEN CELLARS, S.L.' },
-    { ov: '92563/10', of: 'OF-15207', processo: 'LAV001 · Lavação', artigo: 'ROLHA TN 45x24', calibre: '45x24', classe: 'Extra', lavacao: 'Natural', objetivoBase: 480, seed: 8.1, cliente: 'CASA VINHOS DA QUINTA, LDA.' },
-    { ov: '92564/10', of: 'OF-15208', processo: 'EMB002 · Embalagem', artigo: 'ROLHA NAT 49x24', calibre: '49x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 220, seed: 9.5, cliente: 'AMORIM CORK ITALIA, S.P.A.' },
-    { ov: '30410/10', of: 'OF-15209', processo: 'MTI001 · Marcação', artigo: 'ROLHA COL 38x24', calibre: '38x24', classe: 'Segunda', lavacao: 'Rosé', objetivoBase: 190, seed: 10.2, cliente: 'ADEGA COOPERATIVA DO VALE, CRL' },
-    { ov: '48120/10', of: 'OF-15210', processo: 'EMA001 · Escolha', artigo: 'ROLHA NAT 49x24', calibre: '49x24', classe: 'Primeira', lavacao: 'Natural', objetivoBase: null, seed: 11.6, cliente: 'BODEGAS RIOJA ALTA, S.A.' },
-    { ov: '55870/10', of: 'OF-15211', processo: 'MFO001 · Marcação', artigo: 'ROLHA TN 38x24', calibre: '38x24', classe: 'Extra', lavacao: 'Clássica', objetivoBase: null, seed: 12.3, cliente: 'FUNDAÇÃO VALE VERDE' },
-    { ov: '1426011231/10', of: '68759119', processo: 'TRT001 · Tratamento', artigo: 'RT NDT 45X24 FLOR N101 M T', calibre: '45x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 30.0, seed: 3.1, cliente: 'Ocasional3' },
-    { ov: '1420054224/10', of: '68630506', processo: 'EMB002 · Embalagem', artigo: 'PS RT NDT 49X26 1/3 CL0 E', calibre: '49x26', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 910.0, seed: 4.3, cliente: 'SOCIETE NOUVELLE BOUCHONS TRESCASES' },
-    { ov: '1420091080/20', of: '68679055', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 49X24 FLOR/EXT LIGHT E', calibre: '49x24', classe: 'Extra', lavacao: 'Rosé', objetivoBase: 288.0, seed: 5.4, cliente: 'CORCHOS DE ARGENTINA, S.A.' },
-    { ov: '1420091337/20', of: '68748822', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 45X26 EXT N101 E', calibre: '45x26', classe: 'Extra', lavacao: 'Clássica', objetivoBase: 15.0, seed: 6.5, cliente: 'KORKEN SCHIESSER GMBH' },
-    { ov: '1420091337/10', of: '68750722', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 49X25 FLOR N101 E', calibre: '49x25', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 5.0, seed: 7.6, cliente: 'KORKEN SCHIESSER GMBH' },
-    { ov: '1420091401/10', of: '68754230', processo: 'EMB003 · Embalagem', artigo: 'RT NDT 49X24 FLOR_ESP CL0 M T E', calibre: '49x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 42.0, seed: 8.8, cliente: 'SYMINGTON FAMILY ESTATES, VINHOS SA' },
-    { ov: '1420091401/20', of: '68754231', processo: 'EMB003 · Embalagem', artigo: 'RT NDT 49X24 FLOR_ESP CL0 M T E', calibre: '49x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 100.0, seed: 9.9, cliente: 'SYMINGTON FAMILY ESTATES, VINHOS SA' },
-    { ov: '1423051882/10', of: '68756341', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 12.2, cliente: 'AMORIM CORK AMERICA' },
-    { ov: '1423051883/10', of: '68756343', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 1.4, cliente: 'AMORIM CORK AMERICA' },
-    { ov: '1423051885/10', of: '68756345', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 3.7, cliente: 'AMORIM CORK AMERICA' },
-    { ov: '1423051887/10', of: '68756347', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 5.9, cliente: 'AMORIM CORK AMERICA' },
-    { ov: '1423051888/10', of: '68756349', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 8.2, cliente: 'AMORIM CORK AMERICA' },
-    { ov: '1423051890/10', of: '68756351', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 10.5, cliente: 'AMORIM CORK AMERICA' },
-    { ov: '1423051891/10', of: '68756353', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 12.7, cliente: 'AMORIM CORK AMERICA' },
-    { ov: '1423051974/10', of: '68756355', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 2.0, cliente: 'AMORIM CORK AMERICA' },
-    { ov: '1423052323/10', of: '68756423', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 SUP N101 E', calibre: '54x24', classe: 'Extra', lavacao: 'Clássica', objetivoBase: 35.0, seed: 4.2, cliente: 'AMORIM FRANCE, S.A.S.' },
-    { ov: '1423052297/10', of: '68757169', processo: 'EMB003 · Embalagem', artigo: 'RT NDT 45X24 SUP LIGHT M T E', calibre: '45x24', classe: 'Extra', lavacao: 'Clássica', objetivoBase: 6.0, seed: 5.4, cliente: 'ALL CLOSURES IN, S.A.' },
-    { ov: '1426011457/10', of: '68757172', processo: 'EMB003 · Embalagem', artigo: 'RT NEUT 38X24 CF CL0 M T E', calibre: '38x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 100.0, seed: 6.5, cliente: 'Ocasional3' },
-    { ov: '1426011545/10', of: '68757173', processo: 'EMB003 · Embalagem', artigo: 'RT NEUT 44X24 CF CLEAR M T E', calibre: '44x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 50.0, seed: 7.6, cliente: 'Ocasional3' },
-    { ov: '1426011546/10', of: '68757174', processo: 'EMB003 · Embalagem', artigo: 'RT NEUT 44X24 CF CLEAR M T E', calibre: '44x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 50.0, seed: 8.8, cliente: 'Ocasional3' },
-    { ov: '1426011296/10', of: '68757181', processo: 'EMB003 · Embalagem', artigo: 'RT NAT 49X24 SUP/1 N101 M T E', calibre: '49x24', classe: 'Extra', lavacao: 'Natural', objetivoBase: 17.0, seed: 9.9, cliente: 'Ocasional3' },
-    { ov: '1423052329/10', of: '68757238', processo: 'EMB003 · Embalagem', artigo: 'RT TT_EVO 44X24 AA CL0 M T E', calibre: '44x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 5.0, seed: 11.0, cliente: 'AMORIM CORK ESPAÑA, SL' },
-    { ov: '1426011556/10', of: '68757244', processo: 'EMB003 · Embalagem', artigo: 'RT XPUR 44X24 CF CL0 M T E', calibre: '44x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 60.0, seed: 12.2, cliente: 'Ocasional3' },
-    { ov: '1423052218/10', of: '68757245', processo: 'EMB003 · Embalagem', artigo: 'RT NAT_CKS 45X26 EXT/SUP CL2C M T E', calibre: '45x26', classe: 'Extra', lavacao: 'Natural', objetivoBase: 7.0, seed: 13.3, cliente: 'ALL CLOSURES IN, S.A.' },
-    { ov: '1420090238/20', of: '68757246', processo: 'EMB002 · Embalagem', artigo: 'PS RT NAT 49X26 FLOR/SUP G2 E', calibre: '49x26', classe: 'Extra', lavacao: 'Natural', objetivoBase: 2.0, seed: 1.4, cliente: 'SOCIETE NOUVELLE BOUCHONS TRESCASES' },
-    { ov: '1420090244/20', of: '68757247', processo: 'EMB002 · Embalagem', artigo: 'PS RT NAT 49X26 FLOR/SUP G2 E', calibre: '49x26', classe: 'Extra', lavacao: 'Natural', objetivoBase: 7.0, seed: 2.5, cliente: 'SOCIETE NOUVELLE BOUCHONS TRESCASES' }
+    { ov: '16451/10', of: 'OF-15200', processo: 'EMA001 · Escolha', artigo: 'ROLHA NAT 45x24', calibre: '45x24', classe: 'Extra', lavacao: 'Natural', objetivoBase: 320, seed: 1.1, cliente: 'BODEGAS DEL NORTE, S.L.', flow: 'distribuicao' },
+    { ov: '19577/450', of: 'OF-15201', processo: 'PS001 · Pesagem', artigo: 'ROLHA NAT 45x24', calibre: '45x24', classe: 'Extra', lavacao: 'Natural', objetivoBase: 300, seed: 2.3, cliente: 'VINHOS UNIPESSOAL, LDA', flow: 'distribuicao' },
+    { ov: '62321/40', of: 'OF-15202', processo: 'TRT002 · Tratamento', artigo: 'ROLHA COL 49x24', calibre: '49x24', classe: 'Segunda', lavacao: 'Rosé', objetivoBase: 260, seed: 3.7, cliente: 'ADEGA DO MONTE, LDA.', flow: 'distribuicao' },
+    { ov: '71182/410', of: 'OF-15203', processo: 'MFO001 · Marcação', artigo: 'ROLHA COL 49x24', calibre: '49x24', classe: 'Segunda', lavacao: 'Rosé', objetivoBase: 240, seed: 4.2, cliente: 'CANTINE DEL SUD, S.R.L.', flow: 'distribuicao' },
+    { ov: '53135/10', of: 'OF-15204', processo: 'TRT001 · Tratamento', artigo: 'ROLHA NAT 38x24', calibre: '38x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 410, seed: 5.9, cliente: 'QUINTA DO SOBREIRO, CRL', flow: 'distribuicao' },
+    { ov: '53135/20', of: 'OF-15205', processo: 'EMB003 · Embalagem', artigo: 'ROLHA NAT 38x24', calibre: '38x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 400, seed: 6.4, cliente: 'MAISON VIGNERONS, S.A.S.', flow: 'distribuicao' },
+    { ov: '92562/10', of: 'OF-15206', processo: 'EMA001 · Escolha', artigo: 'ROLHA TN 45x24', calibre: '45x24', classe: 'Extra', lavacao: 'Natural', objetivoBase: 500, seed: 7.8, cliente: 'HAMMEKEN CELLARS, S.L.', flow: 'distribuicao' },
+    { ov: '92563/10', of: 'OF-15207', processo: 'PS001 · Pesagem', artigo: 'ROLHA TN 45x24', calibre: '45x24', classe: 'Extra', lavacao: 'Natural', objetivoBase: 480, seed: 8.1, cliente: 'CASA VINHOS DA QUINTA, LDA.', flow: 'distribuicao' },
+    { ov: '92564/10', of: 'OF-15208', processo: 'EMB003 · Embalagem', artigo: 'ROLHA NAT 49x24', calibre: '49x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 220, seed: 9.5, cliente: 'AMORIM CORK ITALIA, S.P.A.', flow: 'distribuicao' },
+    { ov: '30410/10', of: 'OF-15209', processo: 'MTI001 · Marcação', artigo: 'ROLHA COL 38x24', calibre: '38x24', classe: 'Segunda', lavacao: 'Rosé', objetivoBase: 190, seed: 10.2, cliente: 'ADEGA COOPERATIVA DO VALE, CRL', flow: 'distribuicao' },
+    { ov: '48120/10', of: 'OF-15210', processo: 'EMA001 · Escolha', artigo: 'ROLHA NAT 49x24', calibre: '49x24', classe: 'Primeira', lavacao: 'Natural', objetivoBase: null, seed: 11.6, cliente: 'BODEGAS RIOJA ALTA, S.A.', flow: 'distribuicao' },
+    { ov: '55870/10', of: 'OF-15211', processo: 'MFO001 · Marcação', artigo: 'ROLHA TN 38x24', calibre: '38x24', classe: 'Extra', lavacao: 'Clássica', objetivoBase: null, seed: 12.3, cliente: 'FUNDAÇÃO VALE VERDE', flow: 'distribuicao' },
+    { ov: '1426011231/10', of: '68759119', processo: 'NDC001 · NDTech', artigo: 'RT NDT 45X24 FLOR N101 M T', calibre: '45x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 30.0, seed: 3.1, cliente: 'Ocasional3', flow: 'ndtech' },
+    { ov: '1420054224/10', of: '68630506', processo: 'EMB002 · Embalagem', artigo: 'PS RT NDT 49X26 1/3 CL0 E', calibre: '49x26', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 910.0, seed: 4.3, cliente: 'SOCIETE NOUVELLE BOUCHONS TRESCASES', flow: 'ndtech' },
+    { ov: '1420091080/20', of: '68679055', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 49X24 FLOR/EXT LIGHT E', calibre: '49x24', classe: 'Extra', lavacao: 'Rosé', objetivoBase: 288.0, seed: 5.4, cliente: 'CORCHOS DE ARGENTINA, S.A.', flow: 'ndtech' },
+    { ov: '1420091337/20', of: '68748822', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 45X26 EXT N101 E', calibre: '45x26', classe: 'Extra', lavacao: 'Clássica', objetivoBase: 15.0, seed: 6.5, cliente: 'KORKEN SCHIESSER GMBH', flow: 'ndtech' },
+    { ov: '1420091337/10', of: '68750722', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 49X25 FLOR N101 E', calibre: '49x25', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 5.0, seed: 7.6, cliente: 'KORKEN SCHIESSER GMBH', flow: 'ndtech' },
+    { ov: '1420091401/10', of: '68754230', processo: 'EMB003 · Embalagem', artigo: 'RT NDT 49X24 FLOR_ESP CL0 M T E', calibre: '49x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 42.0, seed: 8.8, cliente: 'SYMINGTON FAMILY ESTATES, VINHOS SA', flow: 'ndtech' },
+    { ov: '1420091401/20', of: '68754231', processo: 'EMB003 · Embalagem', artigo: 'RT NDT 49X24 FLOR_ESP CL0 M T E', calibre: '49x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 100.0, seed: 9.9, cliente: 'SYMINGTON FAMILY ESTATES, VINHOS SA', flow: 'ndtech' },
+    { ov: '1423051882/10', of: '68756341', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 12.2, cliente: 'AMORIM CORK AMERICA', flow: 'ndtech' },
+    { ov: '1423051883/10', of: '68756343', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 1.4, cliente: 'AMORIM CORK AMERICA', flow: 'ndtech' },
+    { ov: '1423051885/10', of: '68756345', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 3.7, cliente: 'AMORIM CORK AMERICA', flow: 'ndtech' },
+    { ov: '1423051887/10', of: '68756347', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 5.9, cliente: 'AMORIM CORK AMERICA', flow: 'ndtech' },
+    { ov: '1423051888/10', of: '68756349', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 8.2, cliente: 'AMORIM CORK AMERICA', flow: 'ndtech' },
+    { ov: '1423051890/10', of: '68756351', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 10.5, cliente: 'AMORIM CORK AMERICA', flow: 'ndtech' },
+    { ov: '1423051891/10', of: '68756353', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 12.7, cliente: 'AMORIM CORK AMERICA', flow: 'ndtech' },
+    { ov: '1423051974/10', of: '68756355', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 FLOR_ESP LIGHT E', calibre: '54x24', classe: 'Primeira', lavacao: 'Rosé', objetivoBase: 45.0, seed: 2.0, cliente: 'AMORIM CORK AMERICA', flow: 'ndtech' },
+    { ov: '1423052323/10', of: '68756423', processo: 'EMB002 · Embalagem', artigo: 'RT NDT 54X24 SUP N101 E', calibre: '54x24', classe: 'Extra', lavacao: 'Clássica', objetivoBase: 35.0, seed: 4.2, cliente: 'AMORIM FRANCE, S.A.S.', flow: 'ndtech' },
+    { ov: '1423052297/10', of: '68757169', processo: 'EMB003 · Embalagem', artigo: 'RT NDT 45X24 SUP LIGHT M T E', calibre: '45x24', classe: 'Extra', lavacao: 'Clássica', objetivoBase: 6.0, seed: 5.4, cliente: 'ALL CLOSURES IN, S.A.', flow: 'ndtech' },
+    { ov: '1426011457/10', of: '68757172', processo: 'EMB003 · Embalagem', artigo: 'RT NEUT 38X24 CF CL0 M T E', calibre: '38x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 100.0, seed: 6.5, cliente: 'Ocasional3', flow: 'ndtech' },
+    { ov: '1426011545/10', of: '68757173', processo: 'EMB003 · Embalagem', artigo: 'RT NEUT 44X24 CF CLEAR M T E', calibre: '44x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 50.0, seed: 7.6, cliente: 'Ocasional3', flow: 'ndtech' },
+    { ov: '1426011546/10', of: '68757174', processo: 'EMB003 · Embalagem', artigo: 'RT NEUT 44X24 CF CLEAR M T E', calibre: '44x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 50.0, seed: 8.8, cliente: 'Ocasional3', flow: 'ndtech' },
+    { ov: '1426011296/10', of: '68757181', processo: 'EMB003 · Embalagem', artigo: 'RT NAT 49X24 SUP/1 N101 M T E', calibre: '49x24', classe: 'Extra', lavacao: 'Natural', objetivoBase: 17.0, seed: 9.9, cliente: 'Ocasional3', flow: 'ndtech' },
+    { ov: '1423052329/10', of: '68757238', processo: 'EMB003 · Embalagem', artigo: 'RT TT_EVO 44X24 AA CL0 M T E', calibre: '44x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 5.0, seed: 11.0, cliente: 'AMORIM CORK ESPAÑA, SL', flow: 'ndtech' },
+    { ov: '1426011556/10', of: '68757244', processo: 'EMB003 · Embalagem', artigo: 'RT XPUR 44X24 CF CL0 M T E', calibre: '44x24', classe: 'Primeira', lavacao: 'Clássica', objetivoBase: 60.0, seed: 12.2, cliente: 'Ocasional3', flow: 'ndtech' },
+    { ov: '1423052218/10', of: '68757245', processo: 'EMB003 · Embalagem', artigo: 'RT NAT_CKS 45X26 EXT/SUP CL2C M T E', calibre: '45x26', classe: 'Extra', lavacao: 'Natural', objetivoBase: 7.0, seed: 13.3, cliente: 'ALL CLOSURES IN, S.A.', flow: 'ndtech' },
+    { ov: '1420090238/20', of: '68757246', processo: 'EMB002 · Embalagem', artigo: 'PS RT NAT 49X26 FLOR/SUP G2 E', calibre: '49x26', classe: 'Extra', lavacao: 'Natural', objetivoBase: 2.0, seed: 1.4, cliente: 'SOCIETE NOUVELLE BOUCHONS TRESCASES', flow: 'ndtech' },
+    { ov: '1420090244/20', of: '68757247', processo: 'EMB002 · Embalagem', artigo: 'PS RT NAT 49X26 FLOR/SUP G2 E', calibre: '49x26', classe: 'Extra', lavacao: 'Natural', objetivoBase: 7.0, seed: 2.5, cliente: 'SOCIETE NOUVELLE BOUCHONS TRESCASES', flow: 'ndtech' }
   ];
+  function planoRowsFlow() { return PLANO_ROWS.filter(function (r) { return !r.flow || r.flow === state.globalFlow; }); }
 
   var STOCK_ROWS = [
     { material: 'ROLHA NAT 45x24', setor: 'Escolha', quantidade: 4200 },
@@ -2563,9 +2571,14 @@
 
   function renderPlanoTab() {
     var days = prodWeekDays();
-    var tiposUnicos = ['Todos'].concat(PLANO_ROWS.map(planoTipoOrdem).filter(function (v, i, a) { return a.indexOf(v) === i; }));
-    var centrosUnicos = ['Todos'].concat(PLANO_ROWS.map(planoProcessoCentro).filter(function (v, i, a) { return a.indexOf(v) === i; }));
-    var rows = PLANO_ROWS.filter(function (r) {
+    var flowRows = planoRowsFlow();
+    var tiposUnicos = ['Todos'].concat(flowRows.map(planoTipoOrdem).filter(function (v, i, a) { return a.indexOf(v) === i; }));
+    var centrosUnicos = ['Todos'].concat(flowRows.map(planoProcessoCentro).filter(function (v, i, a) { return a.indexOf(v) === i; }));
+    /* Centro de Trabalho é específico do fluxo (só Pesagem é partilhada) — ao trocar de
+       fluxo, um centro selecionado que já não existe deixaria a tabela vazia em vez de
+       voltar a mostrar tudo. */
+    if (centrosUnicos.indexOf(prodState.processoCentro) === -1) prodState.processoCentro = 'Todos';
+    var rows = flowRows.filter(function (r) {
       return (prodState.tipoOrdem === 'Todos' || planoTipoOrdem(r) === prodState.tipoOrdem) &&
         (prodState.processoCentro === 'Todos' || planoProcessoCentro(r) === prodState.processoCentro) &&
         r.objetivoBase != null;
@@ -2752,7 +2765,7 @@
   function consumoRowsBase() {
     var index = {};
     var out = [];
-    PLANO_ROWS.forEach(function (r) {
+    planoRowsFlow().forEach(function (r) {
       if (r.objetivoBase == null) return;
       var key = r.processo + '||' + r.artigo;
       if (!index[key]) {
@@ -2888,8 +2901,11 @@
 
   function renderConsumosTab() {
     var days = prodWeekDays();
-    var etapasUnicas = ['Todos'].concat(PLANO_ROWS.map(planoProcessoEtapa).filter(function (v, i, a) { return a.indexOf(v) === i; }));
-    var centrosUnicos = ['Todos'].concat(PLANO_ROWS.map(planoProcessoCentro).filter(function (v, i, a) { return a.indexOf(v) === i; }));
+    var flowRows = planoRowsFlow();
+    var etapasUnicas = ['Todos'].concat(flowRows.map(planoProcessoEtapa).filter(function (v, i, a) { return a.indexOf(v) === i; }));
+    var centrosUnicos = ['Todos'].concat(flowRows.map(planoProcessoCentro).filter(function (v, i, a) { return a.indexOf(v) === i; }));
+    if (etapasUnicas.indexOf(prodState.processoEtapa) === -1) prodState.processoEtapa = 'Todos';
+    if (centrosUnicos.indexOf(prodState.processoCentro) === -1) prodState.processoCentro = 'Todos';
     var rows = consumoRowsBase().filter(function (r) {
       return (prodState.processoEtapa === 'Todos' || planoProcessoEtapa(r) === prodState.processoEtapa) &&
         (prodState.processoCentro === 'Todos' || planoProcessoCentro(r) === prodState.processoCentro);
@@ -4594,6 +4610,10 @@
   /* Linhas classificadas pelo SAP não se assinalam nem se retiram à mão. */
   function carteiraTipoAutomatico(r) { return r.motivoOrdem === 'ZP3' || /^1425/.test(r.ov); }
   function carteiraForaDoPlano(r) { return carteiraTipo(r) !== 'encomendas'; }
+  function carteiraTipoLabel(r) {
+    var t = CARTEIRA_TABS.filter(function (t) { return t.key === carteiraTipo(r); })[0];
+    return t ? t.label : '—';
+  }
 
   var CARTEIRA_TAB_AVISOS = {
     amostras: 'Fora do plano. As amostras não entram no sequenciamento nem na capacidade. As do intervalo de OV 1425 vêm assinaladas do SAP; as restantes assinala-as aqui.',
@@ -4669,6 +4689,15 @@
     carteiraCq[r.ov] = p < 0.42 ? 'na' : (p < 0.74 ? 'ok' : (p < 0.9 ? 'pendente' : 'naoOk'));
   });
   function carteiraCqEstado(r) { return carteiraCq[r.ov] || 'na'; }
+  /* Cicla para o próximo estado (na → pendente → ok → naoOk → na). Partilhada pela
+     Carteira e pelo Controlo de Qualidade — é o mesmo estado (carteiraCq), não uma
+     segunda lista paralela. */
+  function carteiraCqAvancar(ov) {
+    var atual = carteiraCq[ov] || 'na';
+    var proximo = CQ_ORDEM[(CQ_ORDEM.indexOf(atual) + 1) % CQ_ORDEM.length];
+    carteiraCq[ov] = proximo;
+    return proximo;
+  }
   function carteiraCqPillHtml(r) {
     var def = CQ_DEFS[carteiraCqEstado(r)];
     return '<button type="button" class="cq-pill ' + def.cls + '" data-carteira-cq="' + r.ov + '" title="' + def.title + ' (clicar para alterar)" aria-label="Controlo de Qualidade: ' + def.label + '">' +
@@ -4765,6 +4794,90 @@
      processo. Mostrá-las vazias sugeria que estão à espera de arrancar. */
   var carteiraColVisible = {};
   CARTEIRA_COLUMNS.forEach(function (c) { carteiraColVisible[c.key] = c.key !== 'motivoOrdem'; });
+
+  /* Fila de trabalho do laboratório de qualidade: mesma fonte de dados e mesmo estado
+     de CQ da Carteira de Encomendas (carteiraCq/carteiraCqAvancar) — mudar aqui
+     reflete-se lá e vice-versa, não há uma segunda lista paralela. Por defeito só
+     mostra "Pendente" (o que falta testar); os outros estados servem para consulta. */
+  var qualidadeState = { busca: '', calibreFiltro: 'Todos', classeFiltro: 'Todos', estadoFiltro: CQ_DEFS.pendente.label };
+
+  function qualidadePageTemplate() {
+    return '<div class="content-card" id="qualidadeCard"></div>';
+  }
+
+  function bindQualidadeControls() { renderQualidadeBody(); }
+
+  function renderQualidadeBody() {
+    var card = document.getElementById('qualidadeCard');
+    var allRows = carteiraRows();
+    var estadosDisponiveis = CQ_ORDEM.map(function (k) { return CQ_DEFS[k].label; });
+    if (['Todos'].concat(estadosDisponiveis).indexOf(qualidadeState.estadoFiltro) === -1) qualidadeState.estadoFiltro = 'Todos';
+
+    function passaFiltros(r) {
+      if (qualidadeState.estadoFiltro !== 'Todos' && CQ_DEFS[carteiraCqEstado(r)].label !== qualidadeState.estadoFiltro) return false;
+      if (qualidadeState.calibreFiltro !== 'Todos' && carteiraCalibre(r.descMaterial) !== qualidadeState.calibreFiltro) return false;
+      if (qualidadeState.classeFiltro !== 'Todos' && carteiraClasse(r.descMaterial) !== qualidadeState.classeFiltro) return false;
+      if (qualidadeState.busca) {
+        var q = qualidadeState.busca.toLowerCase();
+        if ((r.ov + r.descCliente + r.material + r.descMaterial).toLowerCase().indexOf(q) === -1) return false;
+      }
+      return true;
+    }
+    var rows = allRows.filter(passaFiltros);
+    var calibresDisponiveis = Array.from(new Set(allRows.map(function (r) { return carteiraCalibre(r.descMaterial); }))).sort();
+    var classesDisponiveis = Array.from(new Set(allRows.map(function (r) { return carteiraClasse(r.descMaterial); }))).sort();
+
+    var toolbar = '<div class="prod-toolbar" style="align-items:flex-end;">' +
+      labeledInput('Pesquisar', 'qualidadeBusca', 'Pesquisar...', qualidadeState.busca) +
+      labeledSelect('Estado CQ', 'qualidadeEstadoFiltro', ['Todos'].concat(estadosDisponiveis), qualidadeState.estadoFiltro) +
+      labeledSelect('Calibre', 'qualidadeCalibreFiltro', ['Todos'].concat(calibresDisponiveis), qualidadeState.calibreFiltro) +
+      labeledSelect('Classe', 'qualidadeClasseFiltro', ['Todos'].concat(classesDisponiveis), qualidadeState.classeFiltro) +
+      '<button class="btn" id="qualidadeLimparFiltros">' + svg('warn', 'width="13" height="13"') + ' Limpar Filtros</button>' +
+      '</div>';
+
+    var rowsHtml = rows.map(function (r, i) {
+      return '<tr>' +
+        '<td class="prod-cell">' + (i + 1) + '</td>' +
+        '<td class="prod-cell"><span class="tag-pill tag-shared" style="text-transform:none;">' + carteiraTipoLabel(r) + '</span></td>' +
+        '<td>' + r.ov + '</td>' +
+        '<td>' + r.descCliente + '</td>' +
+        '<td>' + r.material + '</td>' +
+        '<td>' + r.descMaterial + '</td>' +
+        '<td>' + r.data + '</td>' +
+        '<td>' + r.dataPedida + '</td>' +
+        '<td class="prod-cell">' + fmt2(r.qtd) + '</td>' +
+        '<td class="prod-cell">' + carteiraCqPillHtml(r) + '</td>' +
+        '</tr>';
+    }).join('');
+
+    var table = '<div class="prod-table-wrap"><table class="prod-table table-compact"><thead><tr>' +
+      '<th>#</th><th>Tipo</th><th>Encomenda / Item</th><th>Descrição do Cliente</th><th>Material</th><th>Descrição do Material</th><th>Data</th><th>Data Pedida</th><th>Qtd</th><th>Controlo de Qualidade</th>' +
+      '</tr></thead><tbody>' + (rowsHtml || '<tr><td colspan="10"><div class="empty-state">Sem linhas para este filtro.</div></td></tr>') + '</tbody></table></div>';
+    var footer = '<div class="table-footer">Linhas por página <select class="filter-select" style="min-width:70px" disabled><option>100</option></select><span class="toolbar-spacer"></span>1-' + rows.length + ' of ' + rows.length + '</div>';
+
+    card.innerHTML = toolbar + table + footer;
+
+    document.getElementById('qualidadeBusca').addEventListener('input', function (e) { qualidadeState.busca = e.target.value; renderQualidadeBody(); });
+    document.getElementById('qualidadeLimparFiltros').addEventListener('click', function () {
+      qualidadeState.busca = '';
+      qualidadeState.estadoFiltro = 'Todos';
+      qualidadeState.calibreFiltro = 'Todos';
+      qualidadeState.classeFiltro = 'Todos';
+      renderQualidadeBody();
+      showToast('Filtros limpos');
+    });
+    document.getElementById('qualidadeEstadoFiltro').addEventListener('change', function (e) { qualidadeState.estadoFiltro = e.target.value; renderQualidadeBody(); });
+    document.getElementById('qualidadeCalibreFiltro').addEventListener('change', function (e) { qualidadeState.calibreFiltro = e.target.value; renderQualidadeBody(); });
+    document.getElementById('qualidadeClasseFiltro').addEventListener('change', function (e) { qualidadeState.classeFiltro = e.target.value; renderQualidadeBody(); });
+    card.querySelectorAll('[data-carteira-cq]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var proximo = carteiraCqAvancar(btn.getAttribute('data-carteira-cq'));
+        renderQualidadeBody();
+        showToast('Controlo de Qualidade: ' + CQ_DEFS[proximo].label);
+      });
+    });
+  }
 
   function carteiraPageTemplate() {
     return '<div class="content-card" id="carteiraCard"></div>';
@@ -4890,10 +5003,7 @@
     card.querySelectorAll('[data-carteira-cq]').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
-        var ov = btn.getAttribute('data-carteira-cq');
-        var atual = carteiraCq[ov] || 'na';
-        var proximo = CQ_ORDEM[(CQ_ORDEM.indexOf(atual) + 1) % CQ_ORDEM.length];
-        carteiraCq[ov] = proximo;
+        var proximo = carteiraCqAvancar(btn.getAttribute('data-carteira-cq'));
         var wrap = card.querySelector('.prod-table-wrap');
         var scroll = wrap ? wrap.scrollLeft : 0;
         renderCarteiraBody();
@@ -4999,7 +5109,7 @@
         '<div class="of-header">' +
           '<div class="of-week">Semana ' + prodWeekLabel() + '</div>' +
           '<div class="toolbar-spacer"></div>' +
-          (state.globalFlow === 'ndtech' ? '<button class="btn btn-primary" id="btnAbrirGerarOfs">' + svg('grid', 'width="14" height="14"') + ' Gerar OFs</button>' : '') +
+          '<button class="btn btn-primary" id="btnAbrirGerarOfs">' + svg('grid', 'width="14" height="14"') + ' Gerar OFs</button>' +
           '<button class="btn" id="btnAbrirAdicionarOf">' + svg('plus', 'width="14" height="14"') + ' Adicionar OF</button>' +
           '<button class="btn btn-primary" data-msg="A imprimir (protótipo)">' + svg('printer', 'width="14" height="14"') + ' Imprimir</button>' +
         '</div>' +
@@ -9357,6 +9467,9 @@
     } else if (state.section === 'reportPlaneamento') {
       main.innerHTML = '<div class="section-page">' + reportPlaneamentoPageTemplate() + '</div>';
       bindReportPlaneamentoControls();
+    } else if (state.section === 'controloQualidade') {
+      main.innerHTML = '<div class="section-page">' + qualidadePageTemplate() + '</div>';
+      bindQualidadeControls();
     } else if (state.section === 'home') {
       main.innerHTML = '<div class="section-page">' + homePageTemplate() + '</div>';
       bindHomeControls();

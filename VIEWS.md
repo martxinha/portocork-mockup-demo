@@ -143,10 +143,52 @@ referem-se a `settings-factory-calendar.html`.
   planeamentos (data, utilizador, prevista, balanço, estado) por OV.
 - Botão "Exportar Excel" é só protótipo (`showToast`, sem exportação real).
 
+## Acompanhamento > Controlo de Qualidade (`controloQualidade`)
+
+- Página dedicada ao laboratório de qualidade — fila de trabalho sobre a
+  **mesma fonte de dados e o mesmo estado da Carteira de Encomendas**
+  (`carteiraRows()`/`carteiraCq`/`CQ_DEFS`/`CQ_ORDEM`), não uma lista
+  paralela: mudar o estado aqui ou na Carteira reflete-se em ambos
+  (`carteiraCqAvancar`, extraído para ser partilhado pelos dois sítios).
+- Filtro "Estado CQ" por defeito em **Pendente** (`qualidadeState.estadoFiltro`
+  = `CQ_DEFS.pendente.label`) — é a fila do que falta testar; os outros
+  estados (Não aplicável/OK/Não OK) servem para consulta/histórico.
+  Filtros adicionais: Calibre, Classe, pesquisa livre.
+- Coluna "Tipo" (`carteiraTipoLabel`) mostra Encomendas/Amostras/
+  Provisionais para contexto, já que a fila não está limitada à tab
+  "Encomendas" da Carteira — o laboratório testa qualquer linha,
+  independentemente de estar dentro ou fora do plano.
+- Pill de CQ clicável (mesmo componente da Carteira, `carteiraCqPillHtml`)
+  — clicar cicla para o próximo estado; sem formulário de detalhe (valor
+  medido/observações) nesta primeira versão.
+
 ## Acompanhamento da Produção (`producaoAcompanhamento`)
 
-Duas sub-tabs (`PROD_SUB_TABS`), ambas sobre a mesma tabela partilhada
-`PLANO_ROWS`:
+Duas sub-tabs (`PROD_SUB_TABS`), ambas sobre `PLANO_ROWS` **filtrada por
+`state.globalFlow`** via `planoRowsFlow()` — ao contrário de Carteira/
+Encomendas/STOs, aqui a linha inteira pertence a um único fluxo (`r.flow`),
+porque o centro de trabalho real não é partilhado entre Distribuição e
+NDTech (excepto Pesagem, `PS001`). Centros válidos por fluxo (ver
+`NEC_CADEIA`):
+
+- **Distribuição**: `EMA001` Escolha, `PS001` Pesagem, `MFO001`/`MLS001`/
+  `MTI001` Marcação (Fogo/Laser/Tinta), `TRT001`/`TRT002` Tratamento,
+  `EMB003` Embalagem.
+- **NDTech**: `NDR001`/`NDC001` NDTech, `LAV001` Lavação, `PS001` Pesagem,
+  `EET002` Escolha Eletrónica, `EMB002`/`EMB003` Embalagem (`EMB003` também
+  é usado pelo NDTech para embalagem via prestação de serviço — confirmado
+  em `BD_SP_Carteira` do `Análises_NDTech.xlsx`, coluna "Descritivo de
+  Centro de Trabalho" = "Embalagem PA").
+- Ao trocar de fluxo, se o filtro de Centro de Trabalho (ou, em Consumos e
+  Produções, o de Processo) já selecionado não existir no novo fluxo, a
+  página repõe-no para "Todos" em vez de mostrar uma tabela vazia.
+- **Bug corrigido**: antes, `PLANO_ROWS` não tinha `flow` por linha e
+  mostrava sempre todas as linhas em ambos os fluxos — em NDTech apareciam
+  linhas com centros só de Distribuição (`EMA001`, `MFO001`/`MTI001`,
+  `TRT001`/`TRT002`), que o NDTech não tem. Corrigido atribuindo `flow` a
+  cada linha (a partir da origem real dos dados/artigo) e substituindo os
+  centros que não existiam no fluxo correspondente pelo centro correto
+  mais próximo.
 
 - **Cumprimento do Plano** (`renderPlanoTab`): uma linha por OV/OF,
   produção vs objetivo por dia da semana, calculados via `genDay()`

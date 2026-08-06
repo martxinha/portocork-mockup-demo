@@ -13,10 +13,14 @@ o trabalho sem repetir correções já feitas.
   com processos e terminologia próprios da Portocork.
 - Dois fluxos operacionais alternáveis no topo da página: **Distribuição** e
   **NDTech** (`state.globalFlow`). A maioria das tabelas principais
-  (Encomendas por Planear, Carteira de Encomendas, STOs, Cumprimento do
-  Plano) é **partilhada entre os dois fluxos** — não filtram por
-  `globalFlow`. Só `GESTAO_ALERTAS_ROWS` / `ALERTAS_ROWS` e as tabelas de
-  Máquinas são específicas de cada fluxo.
+  (Encomendas por Planear, Carteira de Encomendas, STOs) é **partilhada
+  entre os dois fluxos** — não filtram por `globalFlow` (o que muda por
+  fluxo é por-linha, ex. `processoAtual`/`processoAtualNdtech` na
+  Carteira). `GESTAO_ALERTAS_ROWS`/`ALERTAS_ROWS`, as tabelas de Máquinas e
+  `PLANO_ROWS` (Cumprimento do Plano/Consumos e Produções) **filtram por
+  `globalFlow`** via `r.flow` — Distribuição e NDTech não partilham centro
+  de trabalho nenhum exceto Pesagem (`PS001`), por isso aqui a linha
+  inteira (não só um campo) só pertence a um fluxo. Ver `planoRowsFlow()`.
 - Português de Portugal em toda a interface (terminologia dos planeadores).
 
 ## Dados
